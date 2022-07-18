@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/Users_New")
+@RequestMapping("/api/UserProfile")
 public class userProfileController {
 
     @Autowired
@@ -20,12 +20,14 @@ public class userProfileController {
         return UserProfileRepository.findAll();
     }
 
+    //To get data of a user using a particular id
     @GetMapping
     @RequestMapping("{id}")
     public userProfile get(@PathVariable Long id){
         return UserProfileRepository.getOne(id);
     }
 
+    //push data into DB
     @PostMapping
     public userProfile create(@RequestBody final userProfile UserProfile) {
         return UserProfileRepository.saveAndFlush(UserProfile);
@@ -36,7 +38,8 @@ public class userProfileController {
         UserProfileRepository.deleteById(id);
     }
 
-    @RequestMapping(value = "{id}", method = RequestMethod.PUT) //Used to update the record.
+    //Used to update the record.
+    @RequestMapping(value = "{id}", method = RequestMethod.PUT)
     public userProfile update(@PathVariable Long id, @RequestBody userProfile UserProfile) {
         userProfile existingUserProfile = UserProfileRepository.getOne(id);
         BeanUtils.copyProperties(UserProfile, existingUserProfile, "userId");
