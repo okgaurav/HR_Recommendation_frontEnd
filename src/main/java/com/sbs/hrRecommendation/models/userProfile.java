@@ -159,10 +159,10 @@ public class userProfile {
     }
 
     private enum department{
-        RD,
+        R_D,
         FINANCE,
-        SALESMARKETING,
-        MEDIAMANAGEMENT,
+        SALES_MARKETING,
+        MEDIA_MANAGEMENT,
         HR
     }
 

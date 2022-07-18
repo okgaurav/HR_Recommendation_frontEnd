@@ -15,7 +15,7 @@ public class recommendation {
     @Column(name="user_id")
     private Long userId;
     @Column(name="subject")
-    private String subjct;
+    private String subject;
     @Column(name="description")
     private String description;
     @Column(name="is_private")
@@ -25,11 +25,27 @@ public class recommendation {
     @Column(name="modified_at")
     private Time modifiedAt;
     @Column(name="status")
-    private String status;
-    @Lob
-    @Type(type = "org.hibernate.type.BinaryType")
-    @Column(name="media_files")
-    private Byte[] mediaFiles;
+    @Enumerated(EnumType.STRING)
+    private status Status;
+
+    public status getStatus() {
+        return Status;
+    }
+
+    public void setDepartments(status Status) {
+        this.Status = Status;
+    }
+
+    private enum status{
+        SENT,
+        IN_REVIEW,
+        APPROVED,
+        DECLINED
+    }
+//    @Lob
+//    @Type(type = "org.hibernate.type.BinaryType")
+//    @Column(name="media_files")
+//    private Byte[] mediaFiles;
 
     @ManyToOne
     private userProfile users;
@@ -51,12 +67,12 @@ public class recommendation {
         this.userId = userId;
     }
 
-    public String getSubjct() {
-        return subjct;
+    public String getSubject() {
+        return subject;
     }
 
-    public void setSubjct(String subjct) {
-        this.subjct = subjct;
+    public void setSubject(String subject) {
+        this.subject = subject;
     }
 
     public String getDescription() {
@@ -91,20 +107,12 @@ public class recommendation {
         this.modifiedAt = modifiedAt;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Byte[] getMediaFiles() {
-        return mediaFiles;
-    }
-
-    public void setMediaFiles(Byte[] mediaFiles) {
-        this.mediaFiles = mediaFiles;
-    }
+//    public String getStatus() {
+//        return status;
+//    }
+//
+//    public void setStatus(String status) {
+//        this.status = status;
+//    }
 }
 
