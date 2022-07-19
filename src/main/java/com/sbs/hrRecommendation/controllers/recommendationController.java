@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/PostRecommendations")
+@RequestMapping("/api/recommendations")
 public class recommendationController {
 
     @Autowired
@@ -30,6 +30,7 @@ public class recommendationController {
     //push data into DB
     @PostMapping
     public recommendation create(@RequestBody final recommendation Recommendation) {
+        Recommendation.setMyStatus(recommendation.status.SENT);
         return recRepository.saveAndFlush(Recommendation);
 
     }

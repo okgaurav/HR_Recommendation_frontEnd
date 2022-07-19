@@ -5,6 +5,7 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.sql.Time;
+import java.time.LocalDateTime;
 
 @Entity(name="recommendations")
 public class recommendation {
@@ -19,34 +20,37 @@ public class recommendation {
     @Column(name="description")
     private String description;
     @Column(name="is_private")
-    private boolean isPrivate;
+    public boolean isPrivate;
     @Column(name="created_at")
-    private Time createdAt;
+    private LocalDateTime createdAt=LocalDateTime.now();
     @Column(name="modified_at")
-    private Time modifiedAt;
+    private LocalDateTime modifiedAt=LocalDateTime.now();
     @Column(name="status")
     @Enumerated(EnumType.STRING)
-    private status Status;
+    private status myStatus;
 
-    public status getStatus() {
-        return Status;
+    public status getMyStatus() {
+        return myStatus;
     }
 
-    public void setDepartments(status Status) {
-        this.Status = Status;
+    public void setMyStatus(status myStatus) {
+        this.myStatus = myStatus;
     }
 
-    private enum status{
+//    public userProfile getUsers() {
+//        return users;
+//    }
+//
+//    public void setUsers(userProfile users) {
+//        this.users = users;
+//    }
+
+    public enum status{
         SENT,
         IN_REVIEW,
         APPROVED,
         DECLINED
     }
-//    @Lob
-//    @Type(type = "org.hibernate.type.BinaryType")
-//    @Column(name="media_files")
-//    private Byte[] mediaFiles;
-
     @ManyToOne
     private userProfile users;
 
@@ -83,31 +87,30 @@ public class recommendation {
         this.description = description;
     }
 
-    public boolean isPrivate() {
-        return isPrivate;
-    }
+//    public boolean isPrivate() {
+//        return isPrivate;
+//    }
+//
+//    public void setPrivate(boolean aPrivate) {
+//        isPrivate = aPrivate;
+//    }
 
-    public void setPrivate(boolean aPrivate) {
-        isPrivate = aPrivate;
-    }
-
-    public Time getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Time createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Time getModifiedAt() {
+    public LocalDateTime getModifiedAt() {
         return modifiedAt;
     }
 
-    public void setModifiedAt(Time modifiedAt) {
+    public void setModifiedAt(LocalDateTime modifiedAt) {
         this.modifiedAt = modifiedAt;
     }
-
-//    public String getStatus() {
+    //    public String getStatus() {
 //        return status;
 //    }
 //
