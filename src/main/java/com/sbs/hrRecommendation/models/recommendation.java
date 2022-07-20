@@ -46,6 +46,8 @@ public class recommendation {
 //    }
 
     public enum status{
+
+        DRAFT,
         SENT,
         IN_REVIEW,
         APPROVED,

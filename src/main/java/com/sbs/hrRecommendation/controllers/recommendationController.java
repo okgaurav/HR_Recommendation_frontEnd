@@ -6,6 +6,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -20,11 +21,19 @@ public class recommendationController {
         return recRepository.findAll();
     }
 
-    //To get data of a user using a particular id
     @GetMapping
     @RequestMapping("{id}")
-    public recommendation get(@PathVariable Long id){
-        return recRepository.getOne(id);
+    public List<recommendation> listOfRecommendations(@PathVariable Long id) {
+        List<recommendation> rec;
+        List<recommendation> result  = new ArrayList<recommendation>();
+        rec = recRepository.findAll();
+        for (int i = 0; i < rec.size(); i++) {
+
+            if(rec.get(i).getUserId() == id) {
+                result.add(rec.get(i));
+            }
+        }
+        return result;
     }
 
     //push data into DB
