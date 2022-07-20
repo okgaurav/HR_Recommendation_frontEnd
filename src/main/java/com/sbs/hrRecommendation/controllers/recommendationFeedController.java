@@ -36,23 +36,22 @@ public class recommendationFeedController {
     //Used to update the record.
     @RequestMapping(value = "{id}", method = RequestMethod.PUT)
     public recommendation update(@PathVariable Long id, @RequestBody recommendation Recommendation) throws Exception {
-        // DRAFT
         recommendation existingRecommendation = recRepository.getReferenceById(id);
         Long authorId =  existingRecommendation.getUserId();
         Long requestUserId = Recommendation.getUserId();
-        recommendation.status recommendationStatus = existingRecommendation.getMyStatus();
-        System.out.println(Objects.equals(recommendationStatus, recommendation.status.DRAFT) + "#######");
-        if(!Objects.equals(authorId, requestUserId) || !Objects.equals(recommendationStatus, recommendation.status.DRAFT)){
-            // User is not authorised to update draft
-             System.out.println("Unauth access");
-        }
-        else{
-            existingRecommendation.setSubject(Recommendation.getSubject());
-            existingRecommendation.setDescription(Recommendation.getDescription());
-            existingRecommendation.setIsPrivate(Recommendation.getIsPrivate());
+        recommendation.status existingRecommendationStatus = existingRecommendation.getMyStatus();
 
-            BeanUtils.copyProperties(Recommendation, existingRecommendation, "recommendationId");
+        // Author should be same as request owner
+        // Recommendation should be in DRAFT state
+        if(!Objects.equals(authorId, requestUserId) || !Objects.equals(existingRecommendationStatus, recommendation.status.DRAFT)){
+            // User is not authorised to update draft
+             System.out.println("Unauthorised access or Status is not DRAFT");
+            return recRepository.saveAndFlush(existingRecommendation);
         }
+        existingRecommendation.setSubject(Recommendation.getSubject());
+        existingRecommendation.setDescription(Recommendation.getDescription());
+        existingRecommendation.setIsPrivate(Recommendation.getIsPrivate());
+        BeanUtils.copyProperties(Recommendation, existingRecommendation, "recommendationId");
         return recRepository.saveAndFlush(existingRecommendation);
     }
 }
