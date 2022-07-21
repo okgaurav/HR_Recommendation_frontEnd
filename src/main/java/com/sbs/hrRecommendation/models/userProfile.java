@@ -168,7 +168,7 @@ public class userProfile {
     @Enumerated(EnumType.STRING)
     private roles_enum roles;
 
-    private enum roles_enum{
+    public enum roles_enum{
         ADMIN,
         HR,
         USER

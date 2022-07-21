@@ -1,7 +1,9 @@
 package com.sbs.hrRecommendation.controllers;
 
 import com.sbs.hrRecommendation.models.recommendation;
+import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.repositories.recommendationRepository;
+import com.sbs.hrRecommendation.repositories.userProfileRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,8 @@ public class recommendationFeedController {
 
     @Autowired
     private recommendationRepository recRepository;
+    @Autowired
+    private userProfileRepository UserProfileRepository;
 
     @GetMapping
     public List<recommendation> list() {
@@ -38,8 +42,12 @@ public class recommendationFeedController {
     @PutMapping("{id}")
     public recommendation updateRecommendation(@PathVariable Long id, @RequestBody recommendation Recommendation) throws Exception {
         recommendation existingRecommendation = recRepository.getReferenceById(id);
+
         Long authorId =  existingRecommendation.getUserId();
         Long requestUserId = Recommendation.getUserId();
+        userProfile requestUser= UserProfileRepository.getReferenceById(requestUserId);
+        userProfile.roles_enum requestUserRole=requestUser.getRoles();
+
         recommendation.status existingRecommendationStatus = existingRecommendation.getMyStatus();
         LocalDateTime lt = LocalDateTime.now();
 
@@ -52,8 +60,35 @@ public class recommendationFeedController {
             return recRepository.saveAndFlush(existingRecommendation);
         }
 
+        // DRAFT : Author should not be same as requested owner ,requested owner should be HR , and Recommendation should not be as DRAFT status, and HR cannot change the status to DRAFT
+
+        if(Objects.equals(requestUserRole, userProfile.roles_enum.HR)
+                && !Objects.equals(authorId,requestUserId)
+                && !Objects.equals(existingRecommendationStatus, recommendation.status.DRAFT)
+                && !Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT))
+        {
+            existingRecommendation.setMyStatus(Recommendation.getMyStatus());
+            existingRecommendation.setModifiedAt(lt);
+        }
+
+//        if(Objects.equals(requestUserRole, userProfile.roles_enum.HR)
+//                && !Objects.equals(authorId,requestUserId)
+//                && (Objects.equals(existingRecommendationStatus, recommendation.status.APPROVED)
+//                ||  Objects.equals(existingRecommendationStatus, recommendation.status.DECLINED)
+//                || Objects.equals(existingRecommendationStatus, recommendation.status.PENDING)))
+//        {
+//            existingRecommendation.setMyStatus(Recommendation.getMyStatus());
+//            existingRecommendation.setModifiedAt(lt);
+//        }
+
         // User is not authorised to update draft
         System.out.println("Unauthorised access or Status is not DRAFT");
         return recRepository.saveAndFlush(existingRecommendation);
+
+
     }
+
+
 }
+
+
