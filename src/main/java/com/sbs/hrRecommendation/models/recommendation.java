@@ -48,10 +48,11 @@ public class recommendation {
     public enum status{
 
         DRAFT,
-        SENT,
-        IN_REVIEW,
+        PENDING,
+        CHANGES_REQUESTED,
         APPROVED,
-        DECLINED
+        DECLINED,
+        ARCHIVED
     }
     @ManyToOne
     private userProfile users;
