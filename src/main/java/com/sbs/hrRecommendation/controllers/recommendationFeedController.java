@@ -42,17 +42,19 @@ public class recommendationFeedController {
     @PutMapping("{id}")
     public recommendation updateRecommendation(@PathVariable Long id, @RequestBody recommendation Recommendation) throws Exception {
         recommendation existingRecommendation = recRepository.getReferenceById(id);
-
         Long authorId =  existingRecommendation.getUserId();
         Long requestUserId = Recommendation.getUserId();
-        userProfile requestUser= UserProfileRepository.getReferenceById(requestUserId);
-        userProfile.roles_enum requestUserRole=requestUser.getRoles();
-
+        userProfile requestUser = UserProfileRepository.getReferenceById(requestUserId);
+        userProfile.roles_enum requestUserRole = requestUser.getRoles();
         recommendation.status existingRecommendationStatus = existingRecommendation.getMyStatus();
         LocalDateTime lt = LocalDateTime.now();
 
-        // DRAFT : Author should be same as request owner and Recommendation should be in DRAFT state
-        if(Objects.equals(authorId, requestUserId) && Objects.equals(existingRecommendationStatus, recommendation.status.DRAFT)){
+        /*
+            DRAFT:
+            Author should be same as request user and Recommendation should be in DRAFT state
+        */
+        if(Objects.equals(authorId, requestUserId)
+                && Objects.equals(existingRecommendationStatus, recommendation.status.DRAFT)){
             existingRecommendation.setSubject(Recommendation.getSubject());
             existingRecommendation.setDescription(Recommendation.getDescription());
             existingRecommendation.setIsPrivate(Recommendation.getIsPrivate());
@@ -60,24 +62,32 @@ public class recommendationFeedController {
             return recRepository.saveAndFlush(existingRecommendation);
         }
 
-        // STATUS : Author should not be same as requested owner ,requested owner should be HR , and Recommendation should not be as DRAFT status, and HR cannot change the status to DRAFT
-
+        /*
+            STATUS UPDATE:
+            Requested owner should be HR,
+            Author should not be same as requested user,
+            Recommendation should not be in DRAFT state,
+            HR cannot change the status to DRAFT
+        */
         if(Objects.equals(requestUserRole, userProfile.roles_enum.HR)
                 && !Objects.equals(authorId,requestUserId)
                 && !Objects.equals(existingRecommendationStatus, recommendation.status.DRAFT)
-                && !Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT))
-        {
+                && !Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT)) {
             existingRecommendation.setMyStatus(Recommendation.getMyStatus());
             existingRecommendation.setModifiedAt(lt);
         }
 
-       // ARCHIVED : Author should not be same as requested owner ,requested owner should be HR , and Recommendation should not be as DRAFT status, and HR cannot change the status to DRAFT and Recommendation should APPROVED DECLIED PENDING status
+       /*
+            ARCHIVED:
+            Requested owner should be HR,
+            Author should not be same as requested owner,
+            Recommendation status should be APPROVED, DECLINED, PENDING
+       */
         if(Objects.equals(requestUserRole, userProfile.roles_enum.HR)
                 && !Objects.equals(authorId,requestUserId)
                 && (Objects.equals(existingRecommendationStatus, recommendation.status.APPROVED)
                 ||  Objects.equals(existingRecommendationStatus, recommendation.status.DECLINED)
-                || Objects.equals(existingRecommendationStatus, recommendation.status.PENDING)))
-        {
+                || Objects.equals(existingRecommendationStatus, recommendation.status.PENDING))) {
             existingRecommendation.setMyStatus(Recommendation.getMyStatus());
             existingRecommendation.setModifiedAt(lt);
         }
@@ -85,11 +95,7 @@ public class recommendationFeedController {
         // User is not authorised to update draft
         System.out.println("Unauthorised access or Status is not DRAFT");
         return recRepository.saveAndFlush(existingRecommendation);
-
-
     }
-
-
 }
 
 
