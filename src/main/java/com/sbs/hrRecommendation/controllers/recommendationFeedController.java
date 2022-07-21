@@ -63,6 +63,19 @@ public class recommendationFeedController {
         }
 
         /*
+            CHANGES_REQUEST:
+            Author should be same as request user and Recommendation should be in CHANGES_REQUEST state
+        */
+        if(Objects.equals(authorId, requestUserId)
+                && Objects.equals(existingRecommendationStatus, recommendation.status.CHANGES_REQUESTED)){
+            existingRecommendation.setSubject(Recommendation.getSubject());
+            existingRecommendation.setDescription(Recommendation.getDescription());
+            existingRecommendation.setMyStatus(recommendation.status.PENDING);
+            existingRecommendation.setModifiedAt(lt);
+            return recRepository.saveAndFlush(existingRecommendation);
+        }
+
+        /*
             STATUS UPDATE:
             Requested owner should be HR,
             Author should not be same as requested user,
