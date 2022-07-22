@@ -9,11 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import java.util.Optional;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.time.LocalDateTime;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/recommendations")
@@ -75,11 +73,91 @@ public class recommendationController {
     //delete a particular recommendation
     @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
     public void delete(@PathVariable Long id) {
-        recommendation rec = recRepository.getReferenceById(id);
+        recommendation rec = recRepository.getOne(id);
         if(!recRepository.existsById(id))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recommendation Id does not exist");
         if (!rec.getMyStatus().equals(recommendation.status.DRAFT))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status should be only draft");
-        recRepository.deleteByRecommendationIdAndMyStatus(id, recommendation.status.DRAFT);
+        recRepository.deleteById(id);
+    }
+
+    @PutMapping("{id}")
+    public recommendation updateRecommendation(@PathVariable Long id, @RequestBody recommendation Recommendation){
+        recommendation existingRecommendation = recRepository.getReferenceById(id);
+        Long authorId =  existingRecommendation.getUserId();
+        Long requestUserId = Recommendation.getUserId();
+        userProfile requestUser = UserProfileRepository.getReferenceById(requestUserId);
+        userProfile.roles_enum requestUserRole = requestUser.getRoles();
+        recommendation.status existingRecommendationStatus = existingRecommendation.getMyStatus();
+        LocalDateTime lt = LocalDateTime.now();
+
+        /*
+            DRAFT:
+            Author should be same as request user and Recommendation should be in DRAFT state
+        */
+        if(Objects.equals(authorId, requestUserId)
+                && Objects.equals(existingRecommendationStatus, recommendation.status.DRAFT)
+                && (
+                        (Objects.equals(Recommendation.getMyStatus(),recommendation.status.PENDING))
+                ||      (Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT))
+                    )
+        ){
+            existingRecommendation.setSubject(Recommendation.getSubject());
+            existingRecommendation.setDescription(Recommendation.getDescription());
+            existingRecommendation.setIsPrivate(Recommendation.getIsPrivate());
+            existingRecommendation.setMyStatus(Recommendation.getMyStatus());
+            existingRecommendation.setModifiedAt(lt);
+            return recRepository.saveAndFlush(existingRecommendation);
+        }
+
+        /*
+            CHANGES_REQUEST:
+            Author should be same as request user and Recommendation should be in CHANGES_REQUEST state
+        */
+        if(Objects.equals(authorId, requestUserId)
+                && Objects.equals(existingRecommendationStatus, recommendation.status.CHANGES_REQUESTED)){
+            existingRecommendation.setSubject(Recommendation.getSubject());
+            existingRecommendation.setDescription(Recommendation.getDescription());
+            existingRecommendation.setMyStatus(recommendation.status.PENDING);
+            existingRecommendation.setModifiedAt(lt);
+            return recRepository.saveAndFlush(existingRecommendation);
+        }
+
+        /*
+            STATUS UPDATE:
+            Requested owner should be HR,
+            Author should not be same as requested user,
+            Recommendation should not be in DRAFT state,
+            HR cannot change the status to DRAFT
+        */
+        if(Objects.equals(requestUserRole, userProfile.roles_enum.HR)
+                && !Objects.equals(authorId,requestUserId)
+                && !Objects.equals(existingRecommendationStatus, recommendation.status.DRAFT)
+                && !Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT)) {
+            existingRecommendation.setMyStatus(Recommendation.getMyStatus());
+            existingRecommendation.setModifiedAt(lt);
+            return recRepository.saveAndFlush(existingRecommendation);
+        }
+
+       /*
+            ARCHIVED:
+            Requested owner should be HR,
+            Author should not be same as requested owner,
+            Recommendation status should be APPROVED, DECLINED, PENDING
+       */
+        if(Objects.equals(requestUserRole, userProfile.roles_enum.HR)
+                && !Objects.equals(authorId,requestUserId)
+                && (Objects.equals(existingRecommendationStatus, recommendation.status.APPROVED)
+                ||  Objects.equals(existingRecommendationStatus, recommendation.status.DECLINED)
+                || Objects.equals(existingRecommendationStatus, recommendation.status.PENDING))) {
+            existingRecommendation.setMyStatus(existingRecommendationStatus);
+            existingRecommendation.setIsArchived(Recommendation.getIsArchived());
+            existingRecommendation.setModifiedAt(lt);
+            return recRepository.saveAndFlush(existingRecommendation);
+        }
+
+        // User is not authorised to update draft
+
+       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
     }
 }

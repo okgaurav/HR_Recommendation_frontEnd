@@ -99,13 +99,13 @@ public class recommendation {
         this.description = description;
     }
 
-//    public boolean isPrivate() {
-//        return isPrivate;
-//    }
-//
-//    public void setPrivate(boolean aPrivate) {
-//        isPrivate = aPrivate;
-//    }
+    public boolean getIsPrivate() {
+        return isPrivate;
+    }
+
+    public void setIsPrivate(boolean aPrivate) {
+        isPrivate = aPrivate;
+    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
@@ -122,12 +122,6 @@ public class recommendation {
     public void setModifiedAt(LocalDateTime modifiedAt) {
         this.modifiedAt = modifiedAt;
     }
-    //    public String getStatus() {
-//        return status;
-//    }
-//
-//    public void setStatus(String status) {
-//        this.status = status;
-//    }
+
 }
 
