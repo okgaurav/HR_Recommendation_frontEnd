@@ -101,7 +101,7 @@ public class recommendationFeedController {
                 && (Objects.equals(existingRecommendationStatus, recommendation.status.APPROVED)
                 ||  Objects.equals(existingRecommendationStatus, recommendation.status.DECLINED)
                 || Objects.equals(existingRecommendationStatus, recommendation.status.PENDING))) {
-            existingRecommendation.setMyStatus(Recommendation.getMyStatus());
+            existingRecommendation.setIsArchived(Recommendation.getIsArchived());
             existingRecommendation.setModifiedAt(lt);
         }
 

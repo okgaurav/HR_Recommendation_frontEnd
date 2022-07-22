@@ -29,6 +29,17 @@ public class recommendation {
     @Enumerated(EnumType.STRING)
     private status myStatus;
 
+    @Column(name="is_archived")
+    private boolean isArchived;
+
+    public boolean getIsArchived() {
+        return isArchived;
+    }
+
+    public void setIsArchived(boolean archived) {
+        isArchived = archived;
+    }
+
     public status getMyStatus() {
         return myStatus;
     }
