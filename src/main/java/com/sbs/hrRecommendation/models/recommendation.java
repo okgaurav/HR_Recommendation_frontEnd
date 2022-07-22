@@ -28,6 +28,16 @@ public class recommendation {
     @Column(name="status")
     @Enumerated(EnumType.STRING)
     private status myStatus;
+    @Column(name="is_archived")
+    private boolean isArchived;
+
+    public boolean getIsArchived() {
+        return isArchived;
+    }
+
+    public void setIsArchived(boolean archived) {
+        isArchived = archived;
+    }
 
     public status getMyStatus() {
         return myStatus;
@@ -51,8 +61,7 @@ public class recommendation {
         PENDING,
         CHANGES_REQUESTED,
         APPROVED,
-        DECLINED,
-        ARCHIVED
+        DECLINED
     }
     @ManyToOne
     private userProfile users;

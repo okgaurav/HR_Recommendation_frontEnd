@@ -137,9 +137,9 @@ public class userProfile {
     @Column(name="roles")
 //    @NotNull
     @Enumerated(EnumType.STRING)
-    private roles_enum roles;
+    public roles_enum roles;
 
-    private enum roles_enum{
+    public enum roles_enum{
         ADMIN,
         HR,
         USER
@@ -159,7 +159,7 @@ public class userProfile {
     }
 
     private enum department{
-        R_D,
+        RD,
         FINANCE,
         SALES_MARKETING,
         MEDIA_MANAGEMENT,

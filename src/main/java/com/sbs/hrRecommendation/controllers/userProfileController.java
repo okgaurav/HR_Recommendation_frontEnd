@@ -4,7 +4,9 @@ import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -24,7 +26,9 @@ public class userProfileController {
     @GetMapping
     @RequestMapping("{id}")
     public userProfile get(@PathVariable Long id){
-        return UserProfileRepository.getOne(id);
+        if(!UserProfileRepository.existsById(id))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
+        return UserProfileRepository.getReferenceById(id);
     }
 
     //push data into DB
@@ -41,7 +45,9 @@ public class userProfileController {
     //Used to update the record.
     @RequestMapping(value = "{id}", method = RequestMethod.PUT)
     public userProfile update(@PathVariable Long id, @RequestBody userProfile UserProfile) {
-        userProfile existingUserProfile = UserProfileRepository.getOne(id);
+        userProfile existingUserProfile = UserProfileRepository.getReferenceById(id);
+        if(!UserProfileRepository.existsById(id))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
         BeanUtils.copyProperties(UserProfile, existingUserProfile, "userId");
         return UserProfileRepository.saveAndFlush(existingUserProfile);
     }
