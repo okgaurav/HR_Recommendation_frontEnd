@@ -1,6 +1,7 @@
 package com.sbs.hrRecommendation.models;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -8,6 +9,7 @@ import java.sql.Time;
 import java.time.LocalDateTime;
 
 @Entity(name="recommendations")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class recommendation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
