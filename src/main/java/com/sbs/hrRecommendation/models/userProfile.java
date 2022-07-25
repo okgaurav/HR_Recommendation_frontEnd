@@ -6,6 +6,7 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity(name = "users")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -21,6 +22,15 @@ public class userProfile {
     private String userName;
     @Column(name="email_id")
     private String emailId;
+
+    @Column(name="profile_photo")
+    private String profilePhoto;
+    @Column(name="is_active")
+    private Boolean isActive = true;
+    @Column(name="created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name="modified_at")
+    private LocalDateTime modifiedAt = LocalDateTime.now();
 
     public Long getUserId() {
         return userId;
@@ -78,10 +88,6 @@ public class userProfile {
         this.designation = designation;
     }
 
-    public Boolean getActive() {
-        return isActive;
-    }
-
     public void setActive(Boolean active) {
         isActive = active;
     }
@@ -125,14 +131,6 @@ public class userProfile {
     @Column(name="designation")
     private String designation;
 
-//    public byte[] getProfilePhoto() {
-//        return profilePhoto;
-//    }
-//
-//    public void setProfilePhoto(byte[] profilePhoto) {
-//        this.profilePhoto = profilePhoto;
-//    }
-
 //    @Lob //Lob stands for large object. Binary data can get very large so this annotation helps JPA in dealing with larger data.
 //    @Type(type="org.hibernate.type.BinaryType") //This annotation helps hibernate to deal with binary data.
 //    @Column(name="profile_photo")
@@ -145,15 +143,6 @@ public class userProfile {
     public void setProfilePhoto(String profilePhoto) {
         this.profilePhoto = profilePhoto;
     }
-
-    @Column(name="profile_photo")
-    private String profilePhoto;
-    @Column(name="is_active")
-    private Boolean isActive;
-    @Column(name="created_at")
-    private LocalDateTime createdAt;
-    @Column(name="modified_at")
-    private LocalDateTime modifiedAt;
 
     public roles_enum getRoles() {
         return roles;
@@ -194,10 +183,4 @@ public class userProfile {
         MEDIAMANAGEMENT,
         HR
     }
-//    @Column(name="departments")
-//    private String departments;
-
-//    public userProfile() {
-//
-//    }
 }

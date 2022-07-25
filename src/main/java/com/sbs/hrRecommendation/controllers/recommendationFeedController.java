@@ -6,11 +6,12 @@ import com.sbs.hrRecommendation.repositories.recommendationRepository;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/recommendations")
@@ -28,9 +29,45 @@ public class recommendationFeedController {
     //To get data of a user using a particular id
     @GetMapping
     @RequestMapping("{id}")
-    public recommendation get(@PathVariable Long id){
-        return recRepository.getOne(id);
+//    public recommendation get(@PathVariable Long id){
+//        return recRepository.getOne(id);
+//    }
+    public Map<String, List<recommendation>> list(@PathVariable Long id) {
+        List<recommendation> allRecomm = new ArrayList<recommendation>();
+        List<recommendation> archived = new ArrayList<recommendation>();
+//        List<recommendation> myDrafts=new ArrayList<recommendation>();
+        List<recommendation> myRecomm=new ArrayList<recommendation>();
+
+        Map<String, List<recommendation>> map =new HashMap<String,List<recommendation>>();
+
+        userProfile userdata = UserProfileRepository.getReferenceById(id);
+        if(!UserProfileRepository.existsById(id))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
+
+        if(userdata.getRoles().equals(userProfile.roles_enum.HR )){
+
+            allRecomm = recRepository.findByIsArchivedAndMyStatusNot(false, recommendation.status.DRAFT);
+            archived =recRepository.findByIsArchived(true);
+//            myDrafts =recRepository.findByUserIdAndMyStatus(id, recommendation.status.DRAFT);
+            myRecomm =recRepository.findByUserIdAndIsArchivedAndMyStatusNot(id, false, recommendation.status.DRAFT);
+            map.put("allRecommendations",allRecomm);
+            map.put("archived",archived);
+//            map.put("myDrafts",myDrafts);
+            map.put("myRecommendations",myRecomm);
+
+        }
+        else if (userdata.getRoles().equals(userProfile.roles_enum.USER)){
+
+            allRecomm=recRepository.findByIsArchivedAndMyStatusNotAndIsPrivate(false,recommendation.status.DRAFT,false);
+//            myDrafts=recRepository.findByUserIdAndMyStatus(id, recommendation.status.DRAFT);
+            myRecomm=recRepository.findByUserIdAndIsArchivedAndMyStatusNot(id, false, recommendation.status.DRAFT);
+            map.put("allRecommendations",allRecomm);
+//            map.put("myDrafts",myDrafts);
+            map.put("myRecommendations",myRecomm);
+        }
+        return map;
     }
+
     //push data into DB
     @PostMapping
     public recommendation create(@RequestBody final recommendation Recommendation) {
