@@ -1,4 +1,5 @@
 package com.sbs.hrRecommendation.controllers;
+import com.sbs.hrRecommendation.dto.RecommendationResponse;
 import com.sbs.hrRecommendation.models.recommendation;
 import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
@@ -23,34 +24,43 @@ public class recommendationController {
     //used to get all the recommendations present in db
     @GetMapping
     @RequestMapping("{id}")
-    public Map<String, List<recommendation>> list(@PathVariable Long id) {
-        List<recommendation> allRecomm = new ArrayList<recommendation>();
-        List<recommendation> archived = new ArrayList<recommendation>();
-        List<recommendation> myDrafts=new ArrayList<recommendation>();
-        List<recommendation> myRecomm=new ArrayList<recommendation>();
-        Map<String, List<recommendation>> map =new HashMap<String,List<recommendation>>();
+    public Map<String, List<RecommendationResponse>> list(@PathVariable Long id) {
+        List<RecommendationResponse> allRecomm = new ArrayList<RecommendationResponse>();
+        List<RecommendationResponse> archived = new ArrayList<RecommendationResponse>();
+        List<RecommendationResponse> myDrafts=new ArrayList<RecommendationResponse>();
+        List<RecommendationResponse> myRecomm=new ArrayList<RecommendationResponse>();
+        Map<String, List<RecommendationResponse>> map =new HashMap<String,List<RecommendationResponse>>();
         userProfile userdata = UserProfileRepository.getReferenceById(id);
         if(!UserProfileRepository.existsById(id))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
         if(userdata.getRoles().equals(userProfile.roles_enum.HR )){
-            allRecomm = recRepository.findByIsArchivedAndMyStatusNot(false, recommendation.status.DRAFT);
-            archived =recRepository.findByIsArchived(true);
-            myDrafts =recRepository.findByUserIdAndMyStatus(id, recommendation.status.DRAFT);
-            myRecomm =recRepository.findByUserIdAndIsArchivedAndMyStatusNot(id, false, recommendation.status.DRAFT);
+            allRecomm = recRepository.findAllHrRecommendations();
+            archived =recRepository.findArchived();
+            myDrafts =recRepository.findDrafts(id);
+            myRecomm =recRepository.findMyRecommendations(id);
            map.put("allRecommendations",allRecomm);
             map.put("archived",archived);
             map.put("myDrafts",myDrafts);
             map.put("myRecommendations",myRecomm);
         }
         else if (userdata.getRoles().equals(userProfile.roles_enum.USER)){
-            allRecomm=recRepository.findByIsArchivedAndMyStatusNotAndIsPrivate(false,recommendation.status.DRAFT,false);
-            myDrafts=recRepository.findByUserIdAndMyStatus(id, recommendation.status.DRAFT);
-            myRecomm=recRepository.findByUserIdAndIsArchivedAndMyStatusNot(id, false, recommendation.status.DRAFT);
+            allRecomm=recRepository.findAllUserRecommendations();
+            myDrafts=recRepository.findDrafts(id);
+            myRecomm=recRepository.findMyRecommendations(id);
             map.put("allRecommendations",allRecomm);
             map.put("myDrafts",myDrafts);
             map.put("myRecommendations",myRecomm);
         }
         return map;
+    }
+
+
+    @GetMapping
+    @RequestMapping("/rec/{id}")
+    public recommendation get(@PathVariable Long id){
+        if(!recRepository.existsById(id))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recommendation Id does not exist");
+        return recRepository.findByRecommendationId(id);
     }
 
     @PostMapping
@@ -81,6 +91,8 @@ public class recommendationController {
 
     @PutMapping("{id}")
     public recommendation updateRecommendation(@PathVariable Long id, @RequestBody recommendation Recommendation){
+        if(!recRepository.existsById(id))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recommendation Id does not exist");
         recommendation existingRecommendation = recRepository.getReferenceById(id);
         Long authorId =  existingRecommendation.getUserId();
         Long requestUserId = Recommendation.getUserId();
