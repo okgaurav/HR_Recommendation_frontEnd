@@ -3,10 +3,8 @@ import com.sbs.hrRecommendation.models.recommendation;
 import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
 import com.sbs.hrRecommendation.repositories.recommendationRepository;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -39,7 +37,7 @@ public class recommendationController {
             archived =recRepository.findByIsArchived(true);
             myDrafts =recRepository.findByUserIdAndMyStatus(id, recommendation.status.DRAFT);
             myRecomm =recRepository.findByUserIdAndIsArchivedAndMyStatusNot(id, false, recommendation.status.DRAFT);
-            map.put("allRecommendations",allRecomm);
+           map.put("allRecommendations",allRecomm);
             map.put("archived",archived);
             map.put("myDrafts",myDrafts);
             map.put("myRecommendations",myRecomm);
@@ -91,6 +89,7 @@ public class recommendationController {
         recommendation.status existingRecommendationStatus = existingRecommendation.getMyStatus();
         LocalDateTime lt = LocalDateTime.now();
 
+
         /*
             DRAFT:
             Author should be same as request user and Recommendation should be in DRAFT state
@@ -110,6 +109,7 @@ public class recommendationController {
             return recRepository.saveAndFlush(existingRecommendation);
         }
 
+
         /*
             CHANGES_REQUEST:
             Author should be same as request user and Recommendation should be in CHANGES_REQUEST state
@@ -123,6 +123,7 @@ public class recommendationController {
             return recRepository.saveAndFlush(existingRecommendation);
         }
 
+
         /*
             STATUS UPDATE:
             Requested owner should be HR,
@@ -133,11 +134,13 @@ public class recommendationController {
         if(Objects.equals(requestUserRole, userProfile.roles_enum.HR)
                 && !Objects.equals(authorId,requestUserId)
                 && !Objects.equals(existingRecommendationStatus, recommendation.status.DRAFT)
+                && !Objects.equals(Recommendation.getMyStatus(),null)
                 && !Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT)) {
             existingRecommendation.setMyStatus(Recommendation.getMyStatus());
             existingRecommendation.setModifiedAt(lt);
             return recRepository.saveAndFlush(existingRecommendation);
         }
+
 
        /*
             ARCHIVED:
@@ -145,8 +148,10 @@ public class recommendationController {
             Author should not be same as requested owner,
             Recommendation status should be APPROVED, DECLINED, PENDING
        */
+
         if(Objects.equals(requestUserRole, userProfile.roles_enum.HR)
                 && !Objects.equals(authorId,requestUserId)
+                && !Objects.equals(Recommendation.getIsArchived(),null)
                 && (Objects.equals(existingRecommendationStatus, recommendation.status.APPROVED)
                 ||  Objects.equals(existingRecommendationStatus, recommendation.status.DECLINED)
                 || Objects.equals(existingRecommendationStatus, recommendation.status.PENDING))) {
@@ -155,6 +160,7 @@ public class recommendationController {
             existingRecommendation.setModifiedAt(lt);
             return recRepository.saveAndFlush(existingRecommendation);
         }
+
 
         // User is not authorised to update draft
 
