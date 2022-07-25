@@ -57,10 +57,10 @@ public class recommendationController {
 
     @GetMapping
     @RequestMapping("/rec/{id}")
-    public recommendation get(@PathVariable Long id){
+    public RecommendationResponse get(@PathVariable Long id){
         if(!recRepository.existsById(id))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recommendation Id does not exist");
-        return recRepository.findByRecommendationId(id);
+        return recRepository.findRecommendation(id);
     }
 
     @PostMapping

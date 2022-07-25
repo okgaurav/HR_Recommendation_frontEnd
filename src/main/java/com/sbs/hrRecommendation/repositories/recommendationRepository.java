@@ -14,7 +14,10 @@ public interface recommendationRepository extends JpaRepository<recommendation, 
             " r.isPrivate, r.modifiedAt, r.myStatus, r.isArchived, u.userName, u.employeeId, u.designation, u.roles)" +
             " FROM recommendations r, users u where r.userId = u.userId and r.userId=?1 and r.myStatus <> 'DRAFT' and r.isArchived = false")
     List<RecommendationResponse> findMyRecommendations(Long id);
-    recommendation findByRecommendationId(Long id);
+    @Query("SELECT new com.sbs.hrRecommendation.dto.RecommendationResponse(r.recommendationId, r.userId, r.subject, r.description," +
+            " r.isPrivate, r.modifiedAt, r.myStatus, r.isArchived, u.userName, u.employeeId, u.designation, u.roles)" +
+            " FROM recommendations r, users u where r.userId = u.userId and r.recommendationId=?1")
+    RecommendationResponse findRecommendation(Long id);
     List<recommendation> findByIsArchivedAndMyStatusNot(Boolean archive, recommendation.status status);
     @Query("SELECT new com.sbs.hrRecommendation.dto.RecommendationResponse(r.recommendationId, r.userId, r.subject, r.description," +
             " r.isPrivate, r.modifiedAt, r.myStatus, r.isArchived, u.userName, u.employeeId, u.designation, u.roles)" +
