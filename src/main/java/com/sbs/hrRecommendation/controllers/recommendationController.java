@@ -101,18 +101,14 @@ public class recommendationController {
         recommendation.status existingRecommendationStatus = existingRecommendation.getMyStatus();
         LocalDateTime lt = LocalDateTime.now();
 
-
         /*
             DRAFT:
             Author should be same as request user and Recommendation should be in DRAFT state
         */
         if(Objects.equals(authorId, requestUserId)
                 && Objects.equals(existingRecommendationStatus, recommendation.status.DRAFT)
-                && (
-                        (Objects.equals(Recommendation.getMyStatus(),recommendation.status.PENDING))
-                ||      (Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT))
-                    )
-        ){
+                && ((Objects.equals(Recommendation.getMyStatus(),recommendation.status.PENDING))
+                || (Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT)))){
             existingRecommendation.setSubject(Recommendation.getSubject());
             existingRecommendation.setDescription(Recommendation.getDescription());
             existingRecommendation.setIsPrivate(Recommendation.getIsPrivate());
@@ -120,7 +116,6 @@ public class recommendationController {
             existingRecommendation.setModifiedAt(lt);
             return recRepository.saveAndFlush(existingRecommendation);
         }
-
 
         /*
             CHANGES_REQUEST:
@@ -134,7 +129,6 @@ public class recommendationController {
             existingRecommendation.setModifiedAt(lt);
             return recRepository.saveAndFlush(existingRecommendation);
         }
-
 
         /*
             STATUS UPDATE:
@@ -152,7 +146,6 @@ public class recommendationController {
             existingRecommendation.setModifiedAt(lt);
             return recRepository.saveAndFlush(existingRecommendation);
         }
-
 
        /*
             ARCHIVED:
@@ -173,9 +166,47 @@ public class recommendationController {
             return recRepository.saveAndFlush(existingRecommendation);
         }
 
-
         // User is not authorised to update draft
-
        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+    }
+
+    @GetMapping
+    @RequestMapping(value = "/search/{category}")
+    public List<RecommendationResponse> searchFilterList(@PathVariable String category, @RequestBody final RecommendationResponse searchParams) {
+        System.out.println(searchParams.getSubject()+ "CHECK" + category);
+        Long userId=searchParams.getUserId();
+        String categoryTab=category.toUpperCase();
+        if(!UserProfileRepository.existsById(userId)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
+        }
+        System.out.println("Before user check" + userId);
+        userProfile userdata = UserProfileRepository.getReferenceById(userId);
+        if (Objects.equals(userdata.getRoles(),userProfile.roles_enum.USER) && !Objects.equals(categoryTab,"ARCHIVED") ) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+        }
+        System.out.println("Before Validations");
+        if(Objects.equals(searchParams.getSubject(), null))searchParams.setSubject("");
+        if(Objects.equals(searchParams.getUserName(), null))searchParams.setUserName("");
+        if(Objects.equals(searchParams.getMyStatus(), null))searchParams.setMyStatus(recommendation.status.DRAFT);
+        if(Objects.equals(searchParams.getIsPrivate(), null))searchParams.setIsPrivate(false);
+        System.out.println("SUBJECT " +searchParams.getSubject()+ "USERNAME " + searchParams.getUserName() + "STATUS " + searchParams.getMyStatus() + "ID " + searchParams.getUserId());
+        switch (categoryTab) {
+            case "ARCHIVED":
+                return recRepository.findArchivedSearch(searchParams.getSubject(),searchParams.getUserName(),searchParams.getMyStatus(),searchParams.getIsPrivate());
+            case "DRAFT":
+                return recRepository.findDraftSearch(searchParams.getSubject(),searchParams.getIsPrivate(),searchParams.getUserId());
+            case "MYRECOMMENDATION":
+                return recRepository.findMySearch(searchParams.getSubject(),searchParams.getMyStatus(),searchParams.getIsPrivate(),searchParams.getUserId());
+            case "ALLRECOMMENDATION":
+                if (userdata.getRoles().equals(userProfile.roles_enum.USER)){
+                    return recRepository.findAllUserSearch(searchParams.getSubject(),searchParams.getUserName(),searchParams.getMyStatus());
+                }
+                else{
+                    return recRepository.findAllHrSearch(searchParams.getSubject(),searchParams.getUserName(),searchParams.getMyStatus(),searchParams.getIsPrivate());
+                }
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+        }
+//        return recRepository.findAllHrRecommendations();
     }
 }
