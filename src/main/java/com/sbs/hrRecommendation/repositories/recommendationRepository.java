@@ -5,6 +5,7 @@ import com.sbs.hrRecommendation.dto.RecommendationResponse;
 import com.sbs.hrRecommendation.models.recommendation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -47,26 +48,26 @@ public interface recommendationRepository extends JpaRepository<recommendation, 
     @Query("SELECT new com.sbs.hrRecommendation.dto.RecommendationResponse(r.recommendationId, r.userId, r.subject, r.description," +
             " r.isPrivate, r.modifiedAt, r.myStatus, r.isArchived, u.userName, u.employeeId, u.designation, u.roles)" +
             " FROM recommendations r, users u where r.userId = u.userId and r.myStatus <> 'DRAFT' and r.isArchived = false and r.isPrivate=false"+
-            " and r.subject LIKE '%?1%' and u.userName Like '%?2%' and r.myStatus=?3")
-    List<RecommendationResponse> findAllUserSearch(String subject, String userName, recommendation.status myStatus);
+            " and r.subject LIKE '%subject%' and u.userName Like '%name%' and r.myStatus=status")
+    List<RecommendationResponse> findAllUserSearch(@Param("subject") String subject,@Param("name")String userName,@Param("status") recommendation.status myStatus);
     @Query("SELECT new com.sbs.hrRecommendation.dto.RecommendationResponse(r.recommendationId, r.userId, r.subject, r.description," +
             " r.isPrivate, r.modifiedAt, r.myStatus, r.isArchived, u.userName, u.employeeId, u.designation, u.roles)" +
             " FROM recommendations r, users u where r.userId = u.userId and r.myStatus <> 'DRAFT' and r.isArchived = false"+
-            " and r.subject LIKE '%?1%' and u.userName Like '%?2%' and r.myStatus=?3 and r.isPrivate=?4")
-    List<RecommendationResponse> findAllHrSearch(String subject, String userName, recommendation.status myStatus,Boolean isPrivate);
+            " and r.subject LIKE '%subject%' and u.userName Like '%name%' and r.myStatus=status and r.isPrivate=private")
+    List<RecommendationResponse> findAllHrSearch(@Param("subject") String subject,@Param("name")String userName,@Param("status") recommendation.status myStatus,@Param("private") Boolean isPrivate);
     @Query("SELECT new com.sbs.hrRecommendation.dto.RecommendationResponse(r.recommendationId, r.userId, r.subject, r.description," +
             " r.isPrivate, r.modifiedAt, r.myStatus, r.isArchived, u.userName, u.employeeId, u.designation, u.roles)" +
             " FROM recommendations r, users u where r.userId = u.userId and r.myStatus <> 'DRAFT' and r.isArchived = true"+
-            " and r.subject LIKE '%?1%' and u.userName Like '%?2%' and r.myStatus=?3 and r.isPrivate=?4")
-    List<RecommendationResponse> findArchivedSearch(String subject, String userName, recommendation.status myStatus,Boolean isPrivate);
+            " and r.subject LIKE '%subject%' and u.userName Like '%name%' and r.myStatus=status and r.isPrivate=private")
+    List<RecommendationResponse> findArchivedSearch(@Param("subject") String subject,@Param("name")String userName,@Param("status") recommendation.status myStatus,@Param("private") Boolean isPrivate);
     @Query("SELECT new com.sbs.hrRecommendation.dto.RecommendationResponse(r.recommendationId, r.userId, r.subject, r.description," +
             " r.isPrivate, r.modifiedAt, r.myStatus, r.isArchived, u.userName, u.employeeId, u.designation, u.roles)" +
-            " FROM recommendations r, users u where r.userId = u.userId and r.userId = ?3 and r.myStatus = 'DRAFT'"+
-            " and r.subject LIKE '%?1%' and r.isPrivate = ?2 ")
-    List<RecommendationResponse> findDraftSearch(String subject, Boolean isPrivate,Long id);
+            " FROM recommendations r, users u where r.userId = u.userId and r.userId = :id and r.myStatus = 'DRAFT'"+
+            " and r.subject LIKE '%:subject%' and r.isPrivate = :private")
+    List<RecommendationResponse> findDraftSearch(@Param("subject") String subject,@Param("private") Boolean isPrivate,@Param("id")Long id);
     @Query("SELECT new com.sbs.hrRecommendation.dto.RecommendationResponse(r.recommendationId, r.userId, r.subject, r.description," +
             " r.isPrivate, r.modifiedAt, r.myStatus, r.isArchived, u.userName, u.employeeId, u.designation, u.roles)" +
-            " FROM recommendations r, users u where r.userId = u.userId and r.userId = ?4 and r.myStatus <> 'DRAFT' and r.isArchived = false"+
-            " and r.subject LIKE '%?1%' and r.myStatus=?2 and r.isPrivate=?3 ")
-    List<RecommendationResponse> findMySearch(String subject,recommendation.status myStatus,Boolean isPrivate, Long id);
+            " FROM recommendations r, users u where r.userId = u.userId and r.userId = :id and r.myStatus <> 'DRAFT' and r.isArchived = false"+
+            " and r.subject LIKE '%:subject%' and r.myStatus=:status and r.isPrivate=:private ")
+    List<RecommendationResponse> findMySearch(@Param("subject") String subject,@Param("status") recommendation.status myStatus,@Param("private") Boolean isPrivate,@Param("id")Long id);
 }
