@@ -28,7 +28,7 @@ public class recommendationController {
 
     //used to get all the recommendations present in db
     @GetMapping
-    @RequestMapping("{id}")
+    @RequestMapping(value = "{id}", method = RequestMethod.GET)
     public Map<String, List<RecommendationResponse>> list(@PathVariable Long id) {
         List<RecommendationResponse> allRecomm = new ArrayList<RecommendationResponse>();
         List<RecommendationResponse> archived = new ArrayList<RecommendationResponse>();
@@ -93,7 +93,7 @@ public class recommendationController {
 
 
     @GetMapping
-    @RequestMapping("/rec/{id}")
+    @RequestMapping(value = "/rec/{id}", method = RequestMethod.GET)
     public RecommendationResponse get(@PathVariable Long id){
         if(!recRepository.existsById(id))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recommendation Id does not exist");
@@ -101,14 +101,14 @@ public class recommendationController {
     }
 
     @PostMapping
-    @RequestMapping("/save")
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
     public recommendation createDraft(@RequestBody final recommendation Recommendation) {
         Recommendation.setMyStatus(recommendation.status.DRAFT);
         return recRepository.saveAndFlush(Recommendation);
 
     }
     @PostMapping
-    @RequestMapping("/publish")
+    @RequestMapping(value = "/publish", method = RequestMethod.POST)
     public recommendation createPublish(@RequestBody final recommendation Recommendation) {
         Recommendation.setMyStatus(recommendation.status.PENDING);
         return recRepository.saveAndFlush(Recommendation);
@@ -116,6 +116,7 @@ public class recommendationController {
     }
 
     //delete a particular recommendation
+    @DeleteMapping()
     @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
     public void delete(@PathVariable Long id) {
         recommendation rec = recRepository.getOne(id);
@@ -126,7 +127,8 @@ public class recommendationController {
         recRepository.deleteById(id);
     }
 
-    @PutMapping("{id}")
+    @PutMapping()
+    @RequestMapping(value = "{id}", method = RequestMethod.PUT)
     public recommendation updateRecommendation(@PathVariable Long id, @RequestBody recommendation Recommendation){
         if(!recRepository.existsById(id))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recommendation Id does not exist");
