@@ -1,8 +1,6 @@
 package com.sbs.hrRecommendation.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sun.istack.NotNull;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -22,15 +20,17 @@ public class userProfile {
     private String userName;
     @Column(name="email_id")
     private String emailId;
-
     @Column(name="profile_photo")
     private String profilePhoto;
     @Column(name="is_active")
-    private Boolean isActive = true;
+    private Boolean isActive=true;
     @Column(name="created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt=LocalDateTime.now();
     @Column(name="modified_at")
-    private LocalDateTime modifiedAt = LocalDateTime.now();
+    private LocalDateTime modifiedAt=LocalDateTime.now();
+
+    @OneToMany(mappedBy = "users")
+    private List<recommendation> recommendations;
 
     public Long getUserId() {
         return userId;
@@ -88,6 +88,7 @@ public class userProfile {
         this.designation = designation;
     }
 
+
     public void setActive(Boolean active) {
         isActive = active;
     }
@@ -105,24 +106,9 @@ public class userProfile {
     }
 
     public void setModifiedAt(LocalDateTime modifiedAt) {
+
         this.modifiedAt = modifiedAt;
     }
-
-//    public String getRoles() {
-//        return roles;
-//    }
-//
-//    public void setRoles(String roles) {
-//        this.roles = roles;
-//    }
-
-//    public String getDepartments() {
-//        return departments;
-//    }
-//
-//    public void setDepartments(String departments) {
-//        this.departments = departments;
-//    }
 
     @Column(name="password")
     private String password;
@@ -131,11 +117,6 @@ public class userProfile {
     @Column(name="designation")
     private String designation;
 
-//    @Lob //Lob stands for large object. Binary data can get very large so this annotation helps JPA in dealing with larger data.
-//    @Type(type="org.hibernate.type.BinaryType") //This annotation helps hibernate to deal with binary data.
-//    @Column(name="profile_photo")
-//    private byte[] profilePhoto;
-
     public String getProfilePhoto() {
         return profilePhoto;
     }
@@ -143,6 +124,7 @@ public class userProfile {
     public void setProfilePhoto(String profilePhoto) {
         this.profilePhoto = profilePhoto;
     }
+
 
     public roles_enum getRoles() {
         return roles;
@@ -155,7 +137,7 @@ public class userProfile {
     @Column(name="roles")
 //    @NotNull
     @Enumerated(EnumType.STRING)
-    private roles_enum roles;
+    public roles_enum roles;
 
     public enum roles_enum{
         ADMIN,
@@ -179,8 +161,9 @@ public class userProfile {
     private enum department{
         RD,
         FINANCE,
-        SALESMARKETING,
-        MEDIAMANAGEMENT,
+        SALES_MARKETING,
+        MEDIA_MANAGEMENT,
         HR
     }
+
 }

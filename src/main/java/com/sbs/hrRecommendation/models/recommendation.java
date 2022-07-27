@@ -1,7 +1,6 @@
 package com.sbs.hrRecommendation.models;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -9,7 +8,6 @@ import java.sql.Time;
 import java.time.LocalDateTime;
 
 @Entity(name="recommendations")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class recommendation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +28,10 @@ public class recommendation {
     @Column(name="status")
     @Enumerated(EnumType.STRING)
     private status myStatus;
-
     @Column(name="is_archived")
     private boolean isArchived;
+
+
 
     public boolean getIsArchived() {
         return isArchived;
@@ -59,15 +58,14 @@ public class recommendation {
 //    }
 
     public enum status{
+
         DRAFT,
         PENDING,
         CHANGES_REQUESTED,
         APPROVED,
-        DECLINED,
-        SENT, ARCHIVED
+        DECLINED
     }
     @ManyToOne
-    @JoinColumn(name = "")
     private userProfile users;
 
 
@@ -126,5 +124,6 @@ public class recommendation {
     public void setModifiedAt(LocalDateTime modifiedAt) {
         this.modifiedAt = modifiedAt;
     }
+
 }
 

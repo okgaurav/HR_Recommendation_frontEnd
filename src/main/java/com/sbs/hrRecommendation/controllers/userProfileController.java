@@ -1,6 +1,5 @@
 package com.sbs.hrRecommendation.controllers;
 
-import com.sbs.hrRecommendation.customException.NotFoundException;
 import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
 import org.springframework.beans.BeanUtils;
@@ -10,10 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping("/api/v1/Users_New")
+@RequestMapping("/api/UserProfile")
 public class userProfileController {
 
     @Autowired
@@ -24,6 +22,7 @@ public class userProfileController {
         return UserProfileRepository.findAll();
     }
 
+    //To get data of a user using a particular id
     @GetMapping
     @RequestMapping("{id}")
     public userProfile get(@PathVariable Long id){
@@ -32,6 +31,7 @@ public class userProfileController {
         return UserProfileRepository.getReferenceById(id);
     }
 
+    //push data into DB
     @PostMapping
     public userProfile create(@RequestBody final userProfile UserProfile) {
         return UserProfileRepository.saveAndFlush(UserProfile);
@@ -39,17 +39,15 @@ public class userProfileController {
 
     @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
     public void delete(@PathVariable Long id) {
-        if(!UserProfileRepository.existsById(id))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
         UserProfileRepository.deleteById(id);
     }
 
-    @RequestMapping(value = "{id}", method = RequestMethod.PUT) //Used to update the record.
+    //Used to update the record.
+    @RequestMapping(value = "{id}", method = RequestMethod.PUT)
     public userProfile update(@PathVariable Long id, @RequestBody userProfile UserProfile) {
-        if(!UserProfileRepository.existsById(id)){
+        userProfile existingUserProfile = UserProfileRepository.getReferenceById(id);
+        if(!UserProfileRepository.existsById(id))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
-        }
-        userProfile existingUserProfile = UserProfileRepository.getOne(id);
         BeanUtils.copyProperties(UserProfile, existingUserProfile, "userId");
         return UserProfileRepository.saveAndFlush(existingUserProfile);
     }
