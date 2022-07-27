@@ -21,7 +21,7 @@ import com.sbs.hrRecommendation.security.services.userDetailsServiceImpl;
         // securedEnabled = true,
         // jsr250Enabled = true,
         prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class webSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     userDetailsServiceImpl userDetailsService;
     @Autowired
