@@ -170,43 +170,36 @@ public class recommendationController {
        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
     }
 
+    // Search API using UserName and Subject
     @GetMapping
-    @RequestMapping(value = "/search/{category}")
+    @RequestMapping(value = "/search/{category}", method = RequestMethod.GET)
     public List<RecommendationResponse> searchFilterList(@PathVariable String category, @RequestBody final RecommendationResponse searchParams) {
-        System.out.println(searchParams.getSubject()+ "CHECK" + category);
         Long userId=searchParams.getUserId();
         String categoryTab=category.toUpperCase();
-        if(!UserProfileRepository.existsById(userId)){
+        if(!UserProfileRepository.existsById(userId))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
-        }
-        System.out.println("Before user check" + userId);
         userProfile userdata = UserProfileRepository.getReferenceById(userId);
-        if (Objects.equals(userdata.getRoles(),userProfile.roles_enum.USER) && !Objects.equals(categoryTab,"ARCHIVED") ) {
+        if (Objects.equals(userdata.getRoles(),userProfile.roles_enum.USER) && Objects.equals(categoryTab,"ARCHIVED") )
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
-        }
-        System.out.println("Before Validations");
+
+        // Validations: default values to Query body
         if(Objects.equals(searchParams.getSubject(), null))searchParams.setSubject("");
         if(Objects.equals(searchParams.getUserName(), null))searchParams.setUserName("");
-        if(Objects.equals(searchParams.getMyStatus(), null))searchParams.setMyStatus(recommendation.status.DRAFT);
-        if(Objects.equals(searchParams.getIsPrivate(), null))searchParams.setIsPrivate(false);
-        System.out.println("SUBJECT " +searchParams.getSubject()+ "USERNAME " + searchParams.getUserName() + "STATUS " + searchParams.getMyStatus() + "ID " + searchParams.getUserId());
+
         switch (categoryTab) {
             case "ARCHIVED":
-                return recRepository.findArchivedSearch(searchParams.getSubject(),searchParams.getUserName(),searchParams.getMyStatus(),searchParams.getIsPrivate());
+                return recRepository.findArchivedRecommendationsSearch(searchParams.getSubject().toLowerCase(),searchParams.getUserName().toLowerCase());
             case "DRAFT":
-                return recRepository.findDraftSearch(searchParams.getSubject(),searchParams.getIsPrivate(),searchParams.getUserId());
-            case "MYRECOMMENDATION":
-                return recRepository.findMySearch(searchParams.getSubject(),searchParams.getMyStatus(),searchParams.getIsPrivate(),searchParams.getUserId());
-            case "ALLRECOMMENDATION":
-                if (userdata.getRoles().equals(userProfile.roles_enum.USER)){
-                    return recRepository.findAllUserSearch(searchParams.getSubject(),searchParams.getUserName(),searchParams.getMyStatus());
-                }
-                else{
-                    return recRepository.findAllHrSearch(searchParams.getSubject(),searchParams.getUserName(),searchParams.getMyStatus(),searchParams.getIsPrivate());
-                }
+                return recRepository.findDraftRecommendationsSearch(searchParams.getSubject().toLowerCase(), searchParams.getUserId());
+            case "MYRECOMMENDATIONS":
+                return recRepository.findMyRecommendationsSearch(searchParams.getSubject().toLowerCase(), searchParams.getUserId());
+            case "ALLRECOMMENDATIONS":
+                if (userdata.getRoles().equals(userProfile.roles_enum.USER))
+                    return recRepository.findAllUserRecommendationsSearch(searchParams.getSubject().toLowerCase(),searchParams.getUserName().toLowerCase());
+                else
+                    return recRepository.findAllHrRecommendationsSearch(searchParams.getSubject().toLowerCase(),searchParams.getUserName().toLowerCase());
             default:
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
         }
-//        return recRepository.findAllHrRecommendations();
     }
 }
