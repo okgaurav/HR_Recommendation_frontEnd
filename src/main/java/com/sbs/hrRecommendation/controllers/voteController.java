@@ -1,5 +1,6 @@
 package com.sbs.hrRecommendation.controllers;
 
+import com.sbs.hrRecommendation.dto.RecommendationResponse;
 import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.models.votes;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
@@ -9,7 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/votes")
@@ -19,8 +23,15 @@ public class voteController {
     private votesRepository voteRepository;
 
     @GetMapping
-    public Long get(@RequestParam(name ="recommendation_id")final Long recommendationId) {
-        return voteRepository.CountByRecommendationId(recommendationId);
+    @RequestMapping("{id}")
+    public Map<String,Long> get(@PathVariable Long id) {
+        Long up,down;
+        up=voteRepository.CountUpvote(id);
+        down=voteRepository.CountDownvote(id);
+        Map<String, Long> map =new HashMap<String,Long>();
+        map.put("upVote",up);
+        map.put("downVote",down);
+        return  map;
     }
 
     //push data into DB
