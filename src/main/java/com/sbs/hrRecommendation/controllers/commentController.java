@@ -32,6 +32,14 @@ public class commentController {
     }
 
     @GetMapping
+    @RequestMapping("/count/{id}")
+    public Integer getCount(@PathVariable Long id)
+    {
+            return comRepository.countByRecommendationId(id);
+            //Count no. of comments for a recommendation id
+    }
+
+    @GetMapping
     @RequestMapping("{id}")
     public List<CommentResponse> get(@PathVariable Long id){
         return comRepository.findAllComments(id);

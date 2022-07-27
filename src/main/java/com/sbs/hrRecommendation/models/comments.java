@@ -35,8 +35,6 @@ public class comments {
 
     @Column(name="created_at")
     private LocalDateTime createdAt=LocalDateTime.now();
-    @Column(name="modified_at")
-    private LocalDateTime modifiedAt=LocalDateTime.now();
 
     @ManyToOne
     private recommendation Recommendation;
@@ -81,11 +79,4 @@ public class comments {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getModifiedAt() {
-        return modifiedAt;
-    }
-
-    public void setModifiedAt(LocalDateTime modifiedAt) {
-        this.modifiedAt = modifiedAt;
-    }
 }
