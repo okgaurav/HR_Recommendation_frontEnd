@@ -18,6 +18,18 @@ import java.util.List;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class userProfile {
 
+    public userProfile(Long employeeId, String userName, String emailId,  String password,roles_enum roles, department departments) {
+        this.employeeId = employeeId;
+        this.userName = userName;
+        this.emailId = emailId;
+        this.password = password;
+        this.roles = roles;
+        this.departments = departments;
+    }
+
+    userProfile(){
+
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="user_id")
@@ -176,7 +188,7 @@ public class userProfile {
         this.departments = departments;
     }
 
-    private enum department{
+    public enum department{
         RD,
         FINANCE,
         SALES_MARKETING,

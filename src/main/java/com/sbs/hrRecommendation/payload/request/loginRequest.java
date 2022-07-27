@@ -6,17 +6,17 @@ import javax.validation.constraints.NotBlank;
 public class loginRequest {
     @NotBlank
     @Email
-    private String email;
+    private String emailId;
 
     @NotBlank
     private String password;
 
     public String getEmail() {
-        return email;
+        return emailId;
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.emailId = email;
     }
 
     public String getPassword() {

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
+
+import com.sbs.hrRecommendation.payload.request.signupRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -47,5 +49,37 @@ public class authController {
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail()));
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody signupRequest signUpRequest) {
+        if (userRepository.existsByUserName(signUpRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new messageResponse("Error: Username is already taken!"));
+        }
+
+        if (userRepository.existsByEmailId(signUpRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new messageResponse("Error: Email is already in use!"));
+        }
+
+        // Create new user's account
+        userProfile user = new userProfile(
+                signUpRequest.getEmployeeId(),
+                signUpRequest.getUsername(),
+                signUpRequest.getEmail(),
+                encoder.encode(signUpRequest.getPassword()),
+                signUpRequest.getRoles(),
+                signUpRequest.getDepartments()
+               );
+
+
+
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new messageResponse("User registered successfully!"));
     }
 }
