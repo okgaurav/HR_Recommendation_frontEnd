@@ -3,6 +3,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.sbs.hrRecommendation.payload.request.signupRequest;
@@ -38,17 +40,28 @@ public class authController {
     @Autowired
     jwtUtils jwtUtils;
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody loginRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody loginRequest loginRequest, HttpServletResponse response) {
+
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
         userDetailsImpl userDetails = (userDetailsImpl) authentication.getPrincipal();
-        return ResponseEntity.ok(new jwtResponse(jwt,
+
+        // create a cookie
+        Cookie cookie = new Cookie("auth-token", jwt);
+        cookie.setMaxAge(7 * 24 * 60 * 60); // expires in 7 days
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+
+//add cookie to response
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok(new jwtResponse(
                 userDetails.getId(),
                 userDetails.getUsername(),
-                userDetails.getEmail()));
+                userDetails.getRoles()));
     }
 
     @PostMapping("/signup")

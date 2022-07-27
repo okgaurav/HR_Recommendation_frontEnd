@@ -2,10 +2,6 @@ package com.sbs.hrRecommendation.payload.request;
 
 import com.sbs.hrRecommendation.models.userProfile;
 
-import java.util.Set;
-
-import javax.validation.constraints.*;
-
 public class signupRequest {
 
     private String userName;

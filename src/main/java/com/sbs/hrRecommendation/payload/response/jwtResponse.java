@@ -1,37 +1,26 @@
 package com.sbs.hrRecommendation.payload.response;
 
+import com.sbs.hrRecommendation.models.userProfile;
+
 import java.util.List;
 
 public class jwtResponse {
-    private String token;
-    private String type = "Bearer";
+    private userProfile.roles_enum roles;
     private Long id;
     private String username;
-    private String email;
-//    private List<String> roles;
 
-    public jwtResponse(String accessToken, Long id, String username, String email) {
-        this.token = accessToken;
+    public jwtResponse( Long id, String username, userProfile.roles_enum roles) {
         this.id = id;
         this.username = username;
-        this.email = email;
-
+        this.roles= roles;
     }
 
-    public String getAccessToken() {
-        return token;
+    public userProfile.roles_enum getRoles() {
+        return roles;
     }
 
-    public void setAccessToken(String accessToken) {
-        this.token = accessToken;
-    }
-
-    public String getTokenType() {
-        return type;
-    }
-
-    public void setTokenType(String tokenType) {
-        this.type = tokenType;
+    public void setRoles(userProfile.roles_enum roles) {
+        this.roles = roles;
     }
 
     public Long getId() {
@@ -42,13 +31,6 @@ public class jwtResponse {
         this.id = id;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public String getUsername() {
         return username;

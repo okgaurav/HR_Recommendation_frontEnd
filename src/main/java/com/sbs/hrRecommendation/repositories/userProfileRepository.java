@@ -6,6 +6,7 @@ import java.util.Optional;
 
 public interface userProfileRepository extends JpaRepository<userProfile, Long> { //We created this interface because  we get operations like find, update, delete.
     Optional<userProfile> findByUserName(String username);
+    Optional<userProfile> findByEmailId(String email);
     Boolean existsByUserName(String username);
     Boolean existsByEmailId(String email);
 }
