@@ -155,17 +155,21 @@ public class recommendationController {
                 && !Objects.equals(existingRecommendationStatus, recommendation.status.DRAFT)
                 && !Objects.equals(Recommendation.getMyStatus(),null)
                 && !Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT)) {
-            existingRecommendation.setMyStatus(Recommendation.getMyStatus());
-            existingRecommendation.setModifiedAt(lt);
 
             String old_sta = existingRecommendation.getMyStatus().toString();
-            recRepository.saveAndFlush(existingRecommendation);
-            String new_sta = existingRecommendation.getMyStatus().toString();
+            existingRecommendation.setMyStatus(Recommendation.getMyStatus());
+            existingRecommendation.setModifiedAt(lt);
+//            System.out.println("old_sta");
+
+            String new_sta = Recommendation.getMyStatus().toString();
             String sub = new_sta;
             String mess_body = "Your Recommendation with id " + authorId + "has been changed from " + old_sta + " to "
                                      + new_sta;
 
-            emailServiceImp.sendMailWithAttachment(email, mess_body, sub);
+            Map<String, Object> map = new HashMap<>();
+            map.put("Name", "Rohit");
+            map.put("location", "Noida");
+            emailServiceImp.sendMailWithAttachment(email, mess_body, sub, map);
 
             return recRepository.saveAndFlush(existingRecommendation);
 
