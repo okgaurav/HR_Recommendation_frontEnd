@@ -16,6 +16,11 @@ import java.util.*;
 @RequestMapping("/api/recommendations")
 public class recommendationController {
 
+    public static final String ARCHIVED = "ARCHIVED";
+    public static final String DRAFT = "DRAFT";
+    public static final String ALLRECOMMENDATIONS = "ALLRECOMMENDATIONS";
+    public static final String MYRECOMMENDATIONS = "MYRECOMMENDATIONS";
+
     @Autowired
     private recommendationRepository recRepository;
     @Autowired
@@ -52,6 +57,38 @@ public class recommendationController {
             map.put("myRecommendations",myRecomm);
         }
         return map;
+    }
+
+    // Fetch recommendations of a particular category
+    @GetMapping
+    @RequestMapping(value = "{id}/{category}", method = RequestMethod.GET)
+    public List<RecommendationResponse> listRecommendationsCategoryWise(@PathVariable Long id, @PathVariable String category) {
+        // If userId is not valid
+        if(!UserProfileRepository.existsById(id))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
+        userProfile userdata = UserProfileRepository.getReferenceById(id);
+        String categoryTab = category.toUpperCase();
+
+        // USER Role not allowed to search in Archived records
+        if (Objects.equals(userdata.getRoles(),userProfile.roles_enum.USER) && Objects.equals(categoryTab,ARCHIVED))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+
+        // Send a particular category of recommendations upon user role access
+        switch (categoryTab) {
+            case ARCHIVED:
+                return recRepository.findArchived();
+            case DRAFT:
+                return recRepository.findDrafts(id);
+            case MYRECOMMENDATIONS:
+                return recRepository.findMyRecommendations(id);
+            case ALLRECOMMENDATIONS:
+                if (userdata.getRoles().equals(userProfile.roles_enum.USER))
+                    return recRepository.findAllUserRecommendations();
+                else
+                    return recRepository.findAllHrRecommendations();
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+        }
     }
 
 
@@ -176,24 +213,29 @@ public class recommendationController {
     public List<RecommendationResponse> searchFilterList(@PathVariable String category, @RequestBody final RecommendationResponse searchParams) {
         Long userId=searchParams.getUserId();
         String categoryTab=category.toUpperCase();
+
+        // If userId is not valid
         if(!UserProfileRepository.existsById(userId))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
         userProfile userdata = UserProfileRepository.getReferenceById(userId);
-        if (Objects.equals(userdata.getRoles(),userProfile.roles_enum.USER) && Objects.equals(categoryTab,"ARCHIVED") )
+
+        // USER Role not allowed to search in Archived records
+        if (Objects.equals(userdata.getRoles(),userProfile.roles_enum.USER) && Objects.equals(categoryTab,ARCHIVED) )
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
 
         // Validations: default values to Query body
         if(Objects.equals(searchParams.getSubject(), null))searchParams.setSubject("");
         if(Objects.equals(searchParams.getUserName(), null))searchParams.setUserName("");
 
+        // Search according to the category type
         switch (categoryTab) {
-            case "ARCHIVED":
+            case ARCHIVED:
                 return recRepository.findArchivedRecommendationsSearch(searchParams.getSubject().toLowerCase(),searchParams.getUserName().toLowerCase());
-            case "DRAFT":
+            case DRAFT:
                 return recRepository.findDraftRecommendationsSearch(searchParams.getSubject().toLowerCase(), searchParams.getUserId());
-            case "MYRECOMMENDATIONS":
+            case MYRECOMMENDATIONS:
                 return recRepository.findMyRecommendationsSearch(searchParams.getSubject().toLowerCase(), searchParams.getUserId());
-            case "ALLRECOMMENDATIONS":
+            case ALLRECOMMENDATIONS:
                 if (userdata.getRoles().equals(userProfile.roles_enum.USER))
                     return recRepository.findAllUserRecommendationsSearch(searchParams.getSubject().toLowerCase(),searchParams.getUserName().toLowerCase());
                 else
