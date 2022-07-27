@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class userDetailsServiceImpl implements UserDetailsService {
     @Autowired
     userProfileRepository userRepository;
     @Override
