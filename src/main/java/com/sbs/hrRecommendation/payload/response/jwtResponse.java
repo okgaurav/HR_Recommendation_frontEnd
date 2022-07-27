@@ -4,16 +4,18 @@ import java.util.List;
 
 public class jwtResponse {
     private String token;
+    private String type = "Bearer";
     private Long id;
     private String username;
     private String email;
-    private List<String> roles;
+//    private List<String> roles;
 
-    public jwtResponse( Long id, String username, String email, List<String> roles) {
+    public jwtResponse(String accessToken, Long id, String username, String email) {
+        this.token = accessToken;
         this.id = id;
         this.username = username;
         this.email = email;
-        this.roles = roles;
+
     }
 
     public String getAccessToken() {
@@ -56,7 +58,5 @@ public class jwtResponse {
         this.username = username;
     }
 
-    public List<String> getRoles() {
-        return roles;
-    }
+
 }

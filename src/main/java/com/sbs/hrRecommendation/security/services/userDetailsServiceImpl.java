@@ -9,13 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class userDetailsServiceImpl implements UserDetailsService {
     @Autowired
     userProfileRepository userRepository;
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        userProfile user = userRepository.findByUsername(username)
+        userProfile user = userRepository.findByUserName(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
         return userDetailsImpl.build(user);
     }
