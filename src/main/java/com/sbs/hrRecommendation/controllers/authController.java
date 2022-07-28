@@ -96,3 +96,4 @@ public class authController {
         return ResponseEntity.ok(new messageResponse("User registered successfully!"));
     }
 }
+
