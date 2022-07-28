@@ -1,9 +1,5 @@
 package com.sbs.hrRecommendation.controllers;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.servlet.http.Cookie;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -15,11 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.payload.request.loginRequest;
 import com.sbs.hrRecommendation.payload.response.jwtResponse;
@@ -49,16 +41,7 @@ public class authController {
         String jwt = jwtUtils.generateJwtToken(authentication);
         userDetailsImpl userDetails = (userDetailsImpl) authentication.getPrincipal();
 
-        // create a cookie
-        Cookie cookie = new Cookie("auth-token", jwt);
-        cookie.setMaxAge(7 * 24 * 60 * 60); // expires in 7 days
-        cookie.setSecure(true);
-        cookie.setHttpOnly(true);
-
-//add cookie to response
-        response.addCookie(cookie);
-
-        return ResponseEntity.ok(new jwtResponse(
+        return ResponseEntity.ok(new jwtResponse(jwt,
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getRoles()));
@@ -95,5 +78,6 @@ public class authController {
 
         return ResponseEntity.ok(new messageResponse("User registered successfully!"));
     }
+
 }
 
