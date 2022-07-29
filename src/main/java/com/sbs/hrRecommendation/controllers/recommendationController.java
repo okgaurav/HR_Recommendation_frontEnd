@@ -1,4 +1,5 @@
 package com.sbs.hrRecommendation.controllers;
+import com.sbs.hrRecommendation.Services.ArchiveEmailImp;
 import com.sbs.hrRecommendation.dto.RecommendationResponse;
 import com.sbs.hrRecommendation.models.EmailDetails;
 import com.sbs.hrRecommendation.models.recommendation;
@@ -94,6 +95,9 @@ public class recommendationController {
     @Autowired
     private EmailServiceImp emailServiceImp;
 
+    @Autowired
+    private ArchiveEmailImp archiveEmailImp;
+
     @PutMapping("{id}")
     public recommendation updateRecommendation(@PathVariable Long id, @RequestBody recommendation Recommendation){
         if(!recRepository.existsById(id))
@@ -104,9 +108,20 @@ public class recommendationController {
         userProfile requestUser = UserProfileRepository.getReferenceById(requestUserId);
         userProfile authorUser = UserProfileRepository.getReferenceById(authorId);
         String email = authorUser.getEmailId();
+        String recomm_sub = existingRecommendation.getSubject();
+        String hrEmail = requestUser.getEmailId();
         userProfile.roles_enum requestUserRole = requestUser.getRoles();
         recommendation.status existingRecommendationStatus = existingRecommendation.getMyStatus();
+
+        String email_sub = "HR Recommendation || Status Update";
         LocalDateTime lt = LocalDateTime.now();
+
+        Map<String, Object> map = new HashMap<>();
+//        map.put("recomID", requestUserId);
+//        map.put("user_id", authorId);
+//        map.put("user_name", authorUser.getUserName());
+        map.put("hr_name", requestUser.getUserName());
+//        map.put("recom_sub", recomm_sub);
 
 
         /*
@@ -156,20 +171,13 @@ public class recommendationController {
                 && !Objects.equals(Recommendation.getMyStatus(),null)
                 && !Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT)) {
 
-            String old_sta = existingRecommendation.getMyStatus().toString();
             existingRecommendation.setMyStatus(Recommendation.getMyStatus());
             existingRecommendation.setModifiedAt(lt);
+            String new_sta = Recommendation.getMyStatus().toString();
 //            System.out.println("old_sta");
 
-            String new_sta = Recommendation.getMyStatus().toString();
-            String sub = new_sta;
-            String mess_body = "Your Recommendation with id " + authorId + "has been changed from " + old_sta + " to "
-                                     + new_sta;
-
-            Map<String, Object> map = new HashMap<>();
-            map.put("Name", "Rohit");
-            map.put("location", "Noida");
-            emailServiceImp.sendMailWithAttachment(email, mess_body, sub, map);
+            emailServiceImp.sendMailWithAttachment(email,email_sub, map, new_sta,
+                                    authorUser.getUserName(), recomm_sub, requestUser.getUserName());
 
             return recRepository.saveAndFlush(existingRecommendation);
 
@@ -192,11 +200,21 @@ public class recommendationController {
                 && (Objects.equals(existingRecommendationStatus, recommendation.status.APPROVED)
                 ||  Objects.equals(existingRecommendationStatus, recommendation.status.DECLINED)
                 || Objects.equals(existingRecommendationStatus, recommendation.status.PENDING))) {
+            boolean isArchived_body = Recommendation.getIsArchived();
+            boolean isArchived_db = existingRecommendation.getIsArchived();
             existingRecommendation.setMyStatus(existingRecommendationStatus);
             existingRecommendation.setIsArchived(Recommendation.getIsArchived());
+
+            boolean same = Objects.equals(isArchived_db, isArchived_body);
+            System.out.println(same);
+
+            if(!same){
+               archiveEmailImp.sendArchiveMail(email,email_sub, map, Recommendation.getIsArchived(),
+                                authorUser.getUserName(), recomm_sub, requestUser.getUserName());
+            }
             existingRecommendation.setModifiedAt(lt);
 
-             return null;
+            return recRepository.saveAndFlush(existingRecommendation);
 
         }
 

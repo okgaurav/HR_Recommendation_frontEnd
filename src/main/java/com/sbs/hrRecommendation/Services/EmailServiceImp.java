@@ -4,6 +4,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -15,6 +16,7 @@ import javax.mail.internet.MimeMessage;
 
 import freemarker.template.Configuration;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -77,7 +79,7 @@ public class EmailServiceImp {
 //            mimeMessageHelper.setText(content, true);
 //            FileSystemResource file
 //                    = new FileSystemResource(
-//                    new File("src/main/resources/templates/SBSS.jfif"));
+//                    new File("src/main/resources/templates/SBSS.png"));
 //
 //            mimeMessageHelper.addInline("image001", file);
 //
@@ -94,11 +96,13 @@ public class EmailServiceImp {
 //        }
 //    }
                     // CREATED HTML TEMPLATE FOR EMAIL MESSAGE BODY USING FreeMarkerTemplate......
-    public String sendMailWithAttachment(String rec, String msgBody, String sub, Map<String , Object> model)
+    public String sendMailWithAttachment(String rec, String sub, Map<String , Object> model, String new_sta, String userName,
+                                                String rec_subject, String hr_name)
     {
         // Creating a mime message
         MimeMessage mimeMessage
                 = javaMailSender.createMimeMessage();
+
         MimeMessageHelper mimeMessageHelper;
 
         try {
@@ -108,7 +112,32 @@ public class EmailServiceImp {
                     = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED,
                     StandardCharsets.UTF_8.name());
 
-            Template t = configuration.getTemplate("email-template.ftlh");
+            if(new_sta=="APPROVED"){
+                String message = "Dear " + userName + "," +
+                        "\r\n Congratulations! Your Recommendation entitiled " + rec_subject + " has been APPROVED by the HR "
+                                            + hr_name + " with following feedbacks : ";
+                model.put("data",message);
+            } else if(new_sta == "DECLINED"){
+                String message = "Dear " + userName + ",\r\n We regret to inform you that Your Recommendation entitiled " + rec_subject + " has been DECLINED by the HR "
+                        + hr_name + " due to following reasons : ";
+                model.put("data",message);
+            } else{
+                String message = "Dear " + userName + ",\r\n HR " + hr_name + " has requested some Changes for your Recommendation entitiled " + rec_subject + " with the following feedbacks ";
+                model.put("data",message);
+            }
+
+            Template t = configuration.getTemplate("final.ftlh");
+            FileSystemResource file
+                    = new FileSystemResource(
+                    new File("src/main/resources/templates/MicrosoftTeams-image_2.png"));
+            FileSystemResource file1
+                    = new FileSystemResource(
+                    new File("src/main/resources/templates/SBSI.png"));
+
+//
+            mimeMessageHelper.addInline("image001", file);
+            mimeMessageHelper.addInline("image002", file1);
+            // FreeMarkerTemplateUtils is a utility class for working with FreeMarker template to send the email.
             String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
             mimeMessageHelper.setFrom(sender);
             mimeMessageHelper.setTo(rec);
@@ -121,7 +150,7 @@ public class EmailServiceImp {
 //            mimeMessageHelper.setText(content, true);
 //            FileSystemResource file
 //                    = new FileSystemResource(
-//                    new File("src/main/resources/templates/SBSS.jfif"));
+//                    new File("src/main/resources/templates/SBSS.png"));
 //
 //            mimeMessageHelper.addInline("image001", file);
 
