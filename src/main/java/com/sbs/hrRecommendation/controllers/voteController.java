@@ -34,6 +34,12 @@ public class voteController {
         return  map;
     }
 
+    @GetMapping
+    @RequestMapping("{id1}/{id2}")
+    public boolean getLikes(@PathVariable Long id1,@PathVariable Long id2){
+        return voteRepository.getLikesData(id1,id2);
+    }
+
     //push data into DB
     @PostMapping
     public votes create(@RequestBody final votes Votes) {
