@@ -4,7 +4,6 @@ import com.sbs.hrRecommendation.models.recommendation;
 import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
 import com.sbs.hrRecommendation.repositories.recommendationRepository;
-import com.sbs.hrRecommendation.security.jwt.jwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +17,16 @@ import java.util.*;
 @RequestMapping("/api/recommendations")
 public class recommendationController {
 
+    public static final String ARCHIVED = "ARCHIVED";
+    public static final String DRAFT = "DRAFT";
+    public static final String ALLRECOMMENDATIONS = "ALLRECOMMENDATIONS";
+    public static final String MYRECOMMENDATIONS = "MYRECOMMENDATIONS";
+
     @Autowired
     private recommendationRepository recRepository;
     @Autowired
     private userProfileRepository UserProfileRepository;
-    @Autowired
-    jwtUtils jwtUtils;
+
     //used to get all the recommendations present in db
     @GetMapping
     @RequestMapping("{id}")
@@ -42,7 +45,7 @@ public class recommendationController {
             archived =recRepository.findArchived();
             myDrafts =recRepository.findDrafts(id);
             myRecomm =recRepository.findMyRecommendations(id);
-            map.put("allRecommendations",allRecomm);
+           map.put("allRecommendations",allRecomm);
             map.put("archived",archived);
             map.put("myDrafts",myDrafts);
             map.put("myRecommendations",myRecomm);
@@ -58,9 +61,41 @@ public class recommendationController {
         return ResponseEntity.ok(map);
     }
 
+    // Fetch recommendations of a particular category
+    @GetMapping
+    @RequestMapping(value = "{id}/{category}", method = RequestMethod.GET)
+    public List<RecommendationResponse> listRecommendationsCategoryWise(@PathVariable Long id, @PathVariable String category) {
+        // If userId is not valid
+        if(!UserProfileRepository.existsById(id))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
+        userProfile userdata = UserProfileRepository.getReferenceById(id);
+        String categoryTab = category.toUpperCase();
+
+        // USER Role not allowed to search in Archived records
+        if (Objects.equals(userdata.getRoles(),userProfile.roles_enum.USER) && Objects.equals(categoryTab,ARCHIVED))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+
+        // Send a particular category of recommendations upon user role access
+        switch (categoryTab) {
+            case ARCHIVED:
+                return recRepository.findArchived();
+            case DRAFT:
+                return recRepository.findDrafts(id);
+            case MYRECOMMENDATIONS:
+                return recRepository.findMyRecommendations(id);
+            case ALLRECOMMENDATIONS:
+                if (userdata.getRoles().equals(userProfile.roles_enum.USER))
+                    return recRepository.findAllUserRecommendations();
+                else
+                    return recRepository.findAllHrRecommendations();
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+        }
+    }
+
 
     @GetMapping
-    @RequestMapping("/rec/{id}")
+    @RequestMapping(value = "/rec/{id}", method = RequestMethod.GET)
     public RecommendationResponse get(@PathVariable Long id){
         if(!recRepository.existsById(id))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recommendation Id does not exist");
@@ -68,14 +103,14 @@ public class recommendationController {
     }
 
     @PostMapping
-    @RequestMapping("/save")
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
     public recommendation createDraft(@RequestBody final recommendation Recommendation) {
         Recommendation.setMyStatus(recommendation.status.DRAFT);
         return recRepository.saveAndFlush(Recommendation);
 
     }
     @PostMapping
-    @RequestMapping("/publish")
+    @RequestMapping(value = "/publish", method = RequestMethod.POST)
     public recommendation createPublish(@RequestBody final recommendation Recommendation) {
         Recommendation.setMyStatus(recommendation.status.PENDING);
         return recRepository.saveAndFlush(Recommendation);
@@ -83,6 +118,7 @@ public class recommendationController {
     }
 
     //delete a particular recommendation
+    @DeleteMapping()
     @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
     public void delete(@PathVariable Long id) {
         recommendation rec = recRepository.getOne(id);
@@ -93,7 +129,8 @@ public class recommendationController {
         recRepository.deleteById(id);
     }
 
-    @PutMapping("{id}")
+    @PutMapping()
+    @RequestMapping(value = "{id}", method = RequestMethod.PUT)
     public recommendation updateRecommendation(@PathVariable Long id, @RequestBody recommendation Recommendation){
         if(!recRepository.existsById(id))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recommendation Id does not exist");
@@ -105,18 +142,14 @@ public class recommendationController {
         recommendation.status existingRecommendationStatus = existingRecommendation.getMyStatus();
         LocalDateTime lt = LocalDateTime.now();
 
-
         /*
             DRAFT:
             Author should be same as request user and Recommendation should be in DRAFT state
         */
         if(Objects.equals(authorId, requestUserId)
                 && Objects.equals(existingRecommendationStatus, recommendation.status.DRAFT)
-                && (
-                        (Objects.equals(Recommendation.getMyStatus(),recommendation.status.PENDING))
-                ||      (Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT))
-                    )
-        ){
+                && ((Objects.equals(Recommendation.getMyStatus(),recommendation.status.PENDING))
+                || (Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT)))){
             existingRecommendation.setSubject(Recommendation.getSubject());
             existingRecommendation.setDescription(Recommendation.getDescription());
             existingRecommendation.setIsPrivate(Recommendation.getIsPrivate());
@@ -124,7 +157,6 @@ public class recommendationController {
             existingRecommendation.setModifiedAt(lt);
             return recRepository.saveAndFlush(existingRecommendation);
         }
-
 
         /*
             CHANGES_REQUEST:
@@ -138,7 +170,6 @@ public class recommendationController {
             existingRecommendation.setModifiedAt(lt);
             return recRepository.saveAndFlush(existingRecommendation);
         }
-
 
         /*
             STATUS UPDATE:
@@ -156,7 +187,6 @@ public class recommendationController {
             existingRecommendation.setModifiedAt(lt);
             return recRepository.saveAndFlush(existingRecommendation);
         }
-
 
        /*
             ARCHIVED:
@@ -177,9 +207,45 @@ public class recommendationController {
             return recRepository.saveAndFlush(existingRecommendation);
         }
 
-
         // User is not authorised to update draft
-
        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+    }
+
+    // Search API using UserName and Subject
+    @GetMapping
+    @RequestMapping(value = "/search/{category}", method = RequestMethod.GET)
+    public List<RecommendationResponse> searchFilterList(@PathVariable String category, @RequestBody final RecommendationResponse searchParams) {
+        Long userId=searchParams.getUserId();
+        String categoryTab=category.toUpperCase();
+
+        // If userId is not valid
+        if(!UserProfileRepository.existsById(userId))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
+        userProfile userdata = UserProfileRepository.getReferenceById(userId);
+
+        // USER Role not allowed to search in Archived records
+        if (Objects.equals(userdata.getRoles(),userProfile.roles_enum.USER) && Objects.equals(categoryTab,ARCHIVED) )
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+
+        // Validations: default values to Query body
+        if(Objects.equals(searchParams.getSubject(), null))searchParams.setSubject("");
+        if(Objects.equals(searchParams.getUserName(), null))searchParams.setUserName("");
+
+        // Search according to the category type
+        switch (categoryTab) {
+            case ARCHIVED:
+                return recRepository.findArchivedRecommendationsSearch(searchParams.getSubject().toLowerCase(),searchParams.getUserName().toLowerCase());
+            case DRAFT:
+                return recRepository.findDraftRecommendationsSearch(searchParams.getSubject().toLowerCase(), searchParams.getUserId());
+            case MYRECOMMENDATIONS:
+                return recRepository.findMyRecommendationsSearch(searchParams.getSubject().toLowerCase(), searchParams.getUserId());
+            case ALLRECOMMENDATIONS:
+                if (userdata.getRoles().equals(userProfile.roles_enum.USER))
+                    return recRepository.findAllUserRecommendationsSearch(searchParams.getSubject().toLowerCase(),searchParams.getUserName().toLowerCase());
+                else
+                    return recRepository.findAllHrRecommendationsSearch(searchParams.getSubject().toLowerCase(),searchParams.getUserName().toLowerCase());
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+        }
     }
 }
