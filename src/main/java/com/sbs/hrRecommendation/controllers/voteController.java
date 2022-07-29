@@ -2,6 +2,7 @@ package com.sbs.hrRecommendation.controllers;
 
 import com.sbs.hrRecommendation.dto.RecommendationResponse;
 import com.sbs.hrRecommendation.models.userProfile;
+import com.sbs.hrRecommendation.models.voteKey;
 import com.sbs.hrRecommendation.models.votes;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
 import com.sbs.hrRecommendation.repositories.votesRepository;
@@ -36,9 +37,16 @@ public class voteController {
 
     @GetMapping
     @RequestMapping("{id1}/{id2}")
-    public boolean getLikes(@PathVariable Long id1,@PathVariable Long id2){
-        return voteRepository.getLikesData(id1,id2);
-    }
+    public String getLikes(@PathVariable Long id1,@PathVariable Long id2){
+        String result;
+        voteKey id=new voteKey(id1,id2);
+        if(!voteRepository.existsById(id)){
+           result= "null";
+        }
+        else
+            result = String.valueOf(voteRepository.getLikesData(id1,id2));
+        return result;
+     }
 
     //push data into DB
     @PostMapping

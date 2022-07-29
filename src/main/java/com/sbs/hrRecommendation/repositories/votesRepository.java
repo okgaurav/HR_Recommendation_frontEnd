@@ -16,6 +16,8 @@ public interface votesRepository extends JpaRepository<votes, voteKey> {
     Long CountDownvote(Long id);
 
     @Query
-            ("SELECT v.isUpvote FROM recommendationvotes v where v.votekey.recommendationId = ?1 and v.votekey.userId = ?2")
-    boolean getLikesData(Long recomm_id, Long user_id);
+            ("SELECT v.isUpvote FROM recommendationvotes v where v.votekey.recommendationId = ?2 and v.votekey.userId = ?1")
+    boolean getLikesData(Long user_id, Long recomm_id);
+
+
 }
