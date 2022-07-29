@@ -51,4 +51,5 @@ public class userProfileController {
         BeanUtils.copyProperties(UserProfile, existingUserProfile, "userId");
         return UserProfileRepository.saveAndFlush(existingUserProfile);
     }
+
 }

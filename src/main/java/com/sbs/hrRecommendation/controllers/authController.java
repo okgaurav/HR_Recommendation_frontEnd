@@ -1,25 +1,26 @@
 package com.sbs.hrRecommendation.controllers;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.security.Principal;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sbs.hrRecommendation.dto.ResetPasswordDTO;
+import com.sbs.hrRecommendation.payload.request.ResetPasswordRequest;
 import com.sbs.hrRecommendation.payload.request.signupRequest;
+import com.sbs.hrRecommendation.security.services.userDetailsServiceImpl;
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.payload.request.loginRequest;
 import com.sbs.hrRecommendation.payload.response.jwtResponse;
@@ -87,13 +88,43 @@ public class authController {
                 signUpRequest.getRoles(),
                 signUpRequest.getDepartments()
                );
-
-
-
-
         userRepository.save(user);
 
         return ResponseEntity.ok(new messageResponse("User registered successfully!"));
+    }
+
+
+    @Autowired
+    private ResetPasswordRequest resetPasswordRequest;
+
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestHeader(value = "Authorization") String token, @RequestBody ResetPasswordDTO resetPasswordDTO){
+        String response = "";
+        Object body = new Object();
+        try{
+            body = jwtUtils.getUserIdFromJwtToken(token.substring(7, token.length()));
+        }catch (SignatureException e) {
+            response = "Invalid JWT signature" ;
+        } catch (MalformedJwtException e) {
+            response = "Invalid JWT token";
+        } catch (ExpiredJwtException e) {
+            response = "JWT token is expired";
+        } catch (UnsupportedJwtException e) {
+            response = "JWT token is unsupported";
+        } catch (IllegalArgumentException e) {
+            response = "JWT claims string is empty";
+        }
+        if(!response.equals("")){
+            return ResponseEntity.badRequest().body(response);
+        }
+        System.out.println(body);
+        ObjectMapper oMapper = new ObjectMapper();
+        Map<String, Object> map = oMapper.convertValue(body, Map.class);
+        long hello = (Integer) map.get("id");
+        System.out.println(hello);
+        response = resetPasswordRequest.resetPassword((long) 28, resetPasswordDTO);
+        return ResponseEntity.ok(response);
     }
 }
 
