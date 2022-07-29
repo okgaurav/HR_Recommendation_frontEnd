@@ -49,10 +49,10 @@ public class authController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody signupRequest signUpRequest) {
-        if (userRepository.existsByUserName(signUpRequest.getUsername())) {
+        if (signUpRequest.getPassword().length()<8) {
             return ResponseEntity
                     .badRequest()
-                    .body(new messageResponse("Error: Username is already taken!"));
+                    .body(new messageResponse("Error: Password Should be Atleast 8 Characters Long!"));
         }
 
         if (userRepository.existsByEmailId(signUpRequest.getEmail())) {
@@ -70,9 +70,6 @@ public class authController {
                 signUpRequest.getRoles(),
                 signUpRequest.getDepartments()
                );
-
-
-
 
         userRepository.save(user);
 
