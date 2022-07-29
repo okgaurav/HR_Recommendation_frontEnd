@@ -6,6 +6,7 @@ import org.hibernate.annotations.Type;
 import javax.persistence.*;
 import java.sql.Time;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity(name="recommendations")
 public class recommendation {
@@ -47,14 +48,6 @@ public class recommendation {
         this.myStatus = myStatus;
     }
 
-//    public userProfile getUsers() {
-//        return users;
-//    }
-//
-//    public void setUsers(userProfile users) {
-//        this.users = users;
-//    }
-
     public enum status{
 
         DRAFT,
@@ -65,7 +58,6 @@ public class recommendation {
     }
     @ManyToOne
     private userProfile users;
-
 
     public Long getRecommendationId() {
         return recommendationId;
