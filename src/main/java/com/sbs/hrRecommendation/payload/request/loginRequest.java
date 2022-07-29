@@ -1,22 +1,17 @@
 package com.sbs.hrRecommendation.payload.request;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-
 public class loginRequest {
-    @NotBlank
-    @Email
-    private String emailId;
 
-    @NotBlank
+    private String email;
+
     private String password;
 
     public String getEmail() {
-        return emailId;
+        return email;
     }
 
     public void setEmail(String email) {
-        this.emailId = email;
+        this.email = email;
     }
 
     public String getPassword() {

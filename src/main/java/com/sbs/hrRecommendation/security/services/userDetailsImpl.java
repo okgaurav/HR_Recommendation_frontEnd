@@ -14,13 +14,16 @@ public class userDetailsImpl implements UserDetails {
     private Long id;
     private String username;
     private String email;
+
+    private userProfile.roles_enum roles;
     @JsonIgnore
     private String password;
-    public userDetailsImpl(Long id, String username, String email, String password) {
+    public userDetailsImpl(Long id, String username, String email, String password, userProfile.roles_enum roles) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
+        this.roles=roles;
     }
     public static userDetailsImpl build(userProfile user) {
 
@@ -28,7 +31,16 @@ public class userDetailsImpl implements UserDetails {
                 user.getUserId(),
                 user.getUserName(),
                 user.getEmailId(),
-                user.getPassword());
+                user.getPassword(),
+                user.getRoles());
+    }
+
+    public userProfile.roles_enum getRoles() {
+        return roles;
+    }
+
+    public void setRoles(userProfile.roles_enum roles) {
+        this.roles = roles;
     }
 
     public Long getId() {

@@ -17,13 +17,18 @@ public class jwtUtils {
     private int jwtExpirationMs;
     public String generateJwtToken(Authentication authentication) {
         userDetailsImpl userPrincipal = (userDetailsImpl) authentication.getPrincipal();
-        return Jwts.builder().setSubject((userPrincipal.getUsername())).setIssuedAt(new Date())
+        return Jwts.builder().claim("user",userPrincipal).setSubject((userPrincipal.getEmail())).setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs)).signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
     }
+    public Object getUserIdFromJwtToken(String token) {
+        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().get("user");
+    }
+
+
     public boolean validateJwtToken(String authToken) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);

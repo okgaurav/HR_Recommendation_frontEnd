@@ -4,8 +4,10 @@ import com.sbs.hrRecommendation.models.recommendation;
 import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
 import com.sbs.hrRecommendation.repositories.recommendationRepository;
+import com.sbs.hrRecommendation.security.jwt.jwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -20,12 +22,14 @@ public class recommendationController {
     private recommendationRepository recRepository;
     @Autowired
     private userProfileRepository UserProfileRepository;
-
+    @Autowired
+    jwtUtils jwtUtils;
     //used to get all the recommendations present in db
     @GetMapping
     @RequestMapping("{id}")
-    public Map<String, List<RecommendationResponse>> list(@PathVariable Long id) {
-        List<RecommendationResponse> allRecomm = new ArrayList<RecommendationResponse>();
+    public ResponseEntity<?> list(@PathVariable Long id) {
+
+     List<RecommendationResponse> allRecomm = new ArrayList<RecommendationResponse>();
         List<RecommendationResponse> archived = new ArrayList<RecommendationResponse>();
         List<RecommendationResponse> myDrafts=new ArrayList<RecommendationResponse>();
         List<RecommendationResponse> myRecomm=new ArrayList<RecommendationResponse>();
@@ -38,7 +42,7 @@ public class recommendationController {
             archived =recRepository.findArchived();
             myDrafts =recRepository.findDrafts(id);
             myRecomm =recRepository.findMyRecommendations(id);
-           map.put("allRecommendations",allRecomm);
+            map.put("allRecommendations",allRecomm);
             map.put("archived",archived);
             map.put("myDrafts",myDrafts);
             map.put("myRecommendations",myRecomm);
@@ -51,7 +55,7 @@ public class recommendationController {
             map.put("myDrafts",myDrafts);
             map.put("myRecommendations",myRecomm);
         }
-        return map;
+        return ResponseEntity.ok(map);
     }
 
 
