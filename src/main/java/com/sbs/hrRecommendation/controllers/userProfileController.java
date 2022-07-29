@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/UserProfile")
+@RequestMapping("/api/user")
 public class userProfileController {
 
     @Autowired
@@ -32,7 +32,7 @@ public class userProfileController {
     }
 
     //push data into DB
-    @PostMapping
+    /*@PostMapping
     public userProfile create(@RequestBody final userProfile UserProfile) {
         return UserProfileRepository.saveAndFlush(UserProfile);
     }
@@ -50,5 +50,5 @@ public class userProfileController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
         BeanUtils.copyProperties(UserProfile, existingUserProfile, "userId");
         return UserProfileRepository.saveAndFlush(existingUserProfile);
-    }
+    }*/
 }
