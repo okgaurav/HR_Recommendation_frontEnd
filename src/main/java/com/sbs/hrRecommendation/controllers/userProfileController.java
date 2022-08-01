@@ -1,17 +1,9 @@
 package com.sbs.hrRecommendation.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sbs.hrRecommendation.dto.RecommendationResponse;
 import com.sbs.hrRecommendation.dto.ResetPasswordDTO;
-import com.sbs.hrRecommendation.dto.UserDTO;
-import com.sbs.hrRecommendation.models.recommendation;
 import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.payload.response.messageResponse;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
-import com.sbs.hrRecommendation.security.jwt.authEntryPointJwt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
@@ -67,17 +57,12 @@ public class userProfileController {
         return ResponseEntity.status(200).body(new messageResponse("Password Updated Successfully"));
     }
     //push data into DB
-    private static final Logger logger = LoggerFactory.getLogger(authEntryPointJwt.class);
     @PostMapping(value = "/create/{id}")
-    public ResponseEntity<?> adduser(@PathVariable Long id, @Valid @RequestBody userProfile user) {
-        logger.error("first statment");
+    public ResponseEntity<?> adduser(@PathVariable("id") Long id, @RequestBody userProfile user) {
         userProfile userdata = UserProfileRepository.getReferenceById(id);
-        System.out.println("second statement");
+        System.out.println(userdata.getUserId());
         if(Objects.equals(userdata.getRoles(),userProfile.roles_enum.ADMIN))
             {
-
-                System.out.println("third statement");
-
 //                userProfile newUser = new userProfile(
 //                        user.getEmployeeId(),
 //                        user.getUserName(),
@@ -85,9 +70,12 @@ public class userProfileController {
 //                        encoder.encode("12345678"),
 //                        user.getRoles(),
 //                        user.getDepartments());
+                String password= getPassword();
+                user.setPassword(encoder.encode(password));
+                System.out.println(user);
+                UserProfileRepository.saveAndFlush(user);
 
-
-                 UserProfileRepository.saveAndFlush(user);
+                // UserProfileRepository.saveAndFlush(newUser);
                  return ResponseEntity.status(200).body(new messageResponse("User Added Successfully"));
         }
 
@@ -95,6 +83,37 @@ public class userProfileController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
         }
     }
+    static String getPassword()
+    {
+        int n=8;
+
+        // chose a Character random from this String
+        String AlphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                + "0123456789"
+                + "abcdefghijklmnopqrstuvxyz";
+
+        // create StringBuffer size of AlphaNumericString
+        StringBuilder sb = new StringBuilder(n);
+
+        for (int i = 0; i < n; i++) {
+
+            // generate a random number between
+            // 0 to AlphaNumericString variable length
+            int index
+                    = (int)(AlphaNumericString.length()
+                    * Math.random());
+
+            // add Character one by one in end of sb
+            sb.append(AlphaNumericString
+                    .charAt(index));
+        }
+        System.out.println(sb.toString());
+
+        return sb.toString();
+    }
+
+
+
 
    /* @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
     public void delete(@PathVariable Long id) {

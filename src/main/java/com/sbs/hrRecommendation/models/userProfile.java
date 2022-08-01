@@ -27,6 +27,23 @@ public class userProfile {
         this.departments = departments;
     }
 
+    //add a new user constructor
+    public userProfile(Long employeeId,
+                       String userName,
+                       String emailId,
+                       roles_enum roles,
+                       department departments,
+                       String phoneNum,
+                       String designation) {
+        this.employeeId = employeeId;
+        this.userName = userName;
+        this.emailId = emailId;
+        this.roles = roles;
+        this.departments = departments;
+        this.phoneNum=designation;
+        this.designation=designation;
+    }
+
     userProfile(){
 
     }
