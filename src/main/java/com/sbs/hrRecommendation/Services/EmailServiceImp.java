@@ -99,6 +99,7 @@ public class EmailServiceImp {
     public String sendMailWithAttachment(String rec, String sub, Map<String , Object> model, String new_sta, String userName,
                                                 String rec_subject, String hr_name)
     {
+        System.out.println("inside email");
         // Creating a mime message
         MimeMessage mimeMessage
                 = javaMailSender.createMimeMessage();

@@ -56,8 +56,9 @@ public class userProfileController {
         }
         return ResponseEntity.status(200).body(new messageResponse("Password Updated Successfully"));
     }
-    //push data into DB
-    @PostMapping(value = "/create/{id}")
+
+    //add a new user API
+    @PostMapping(value = "{id}")
     public ResponseEntity<?> adduser(@PathVariable("id") Long id, @RequestBody userProfile user) {
         userProfile userdata = UserProfileRepository.getReferenceById(id);
         System.out.println(userdata.getUserId());
