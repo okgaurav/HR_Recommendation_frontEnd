@@ -3,22 +3,65 @@ package com.sbs.hrRecommendation.models;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity(name = "users")
+@Table(	name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "user_name"),
+                @UniqueConstraint(columnNames = "email_id")
+        })
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class userProfile {
 
+    public userProfile(Long employeeId, String userName, String emailId,  String password,roles_enum roles, department departments) {
+        this.employeeId = employeeId;
+        this.userName = userName;
+        this.emailId = emailId;
+        this.password = password;
+        this.roles = roles;
+        this.departments = departments;
+    }
+
+    //add a new user constructor
+    public userProfile(Long employeeId,
+                       String userName,
+                       String emailId,
+                       roles_enum roles,
+                       department departments,
+                       String phoneNum,
+                       String designation) {
+        this.employeeId = employeeId;
+        this.userName = userName;
+        this.emailId = emailId;
+        this.roles = roles;
+        this.departments = departments;
+        this.phoneNum=designation;
+        this.designation=designation;
+    }
+
+    userProfile(){
+
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="user_id")
     private Long userId;
+
     @Column(name="employee_id")
     private Long employeeId;
     @Column(name="user_name")
+    @NotBlank
+    @Size(max = 20)
     private String userName;
     @Column(name="email_id")
+    @NotBlank
+    @Size(max = 50)
+    @Email
     private String emailId;
     @Column(name="profile_photo")
     private String profilePhoto;
@@ -28,6 +71,10 @@ public class userProfile {
     private LocalDateTime createdAt=LocalDateTime.now();
     @Column(name="modified_at")
     private LocalDateTime modifiedAt=LocalDateTime.now();
+
+    @Column(name="password")
+    @NotBlank
+    private String password;
 
     @OneToMany(mappedBy = "users")
     private List<recommendation> recommendations;
@@ -110,8 +157,8 @@ public class userProfile {
         this.modifiedAt = modifiedAt;
     }
 
-    @Column(name="password")
-    private String password;
+//    @Column(name="password")
+//    private String password;
     @Column(name="phone_num")
     private String phoneNum;
     @Column(name="designation")
@@ -158,7 +205,7 @@ public class userProfile {
         this.departments = departments;
     }
 
-    private enum department{
+    public enum department{
         RD,
         FINANCE,
         SALES_MARKETING,

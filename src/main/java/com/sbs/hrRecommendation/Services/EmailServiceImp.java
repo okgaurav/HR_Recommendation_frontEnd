@@ -138,7 +138,7 @@ public class EmailServiceImp {
             mimeMessageHelper.addInline("image001", file);
             mimeMessageHelper.addInline("image002", file1);
             // FreeMarkerTemplateUtils is a utility class for working with FreeMarker template to send the email.
-            String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
+            String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, null);
             mimeMessageHelper.setFrom(sender);
             mimeMessageHelper.setTo(rec);
             mimeMessageHelper.setText(html, true);
