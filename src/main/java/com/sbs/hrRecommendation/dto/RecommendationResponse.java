@@ -1,6 +1,7 @@
 package com.sbs.hrRecommendation.dto;
 
 
+import com.sbs.hrRecommendation.models.comments;
 import com.sbs.hrRecommendation.models.recommendation;
 import com.sbs.hrRecommendation.models.userProfile;
 
@@ -19,6 +20,36 @@ public class RecommendationResponse {
     private Long employeeId;
     private String designation;
     private userProfile.roles_enum roles;
+
+    private Integer count;
+
+    private Integer countUpvote;
+
+    public Integer getCountUpvote() {
+        return countUpvote;
+    }
+
+    public void setCountUpvote(Integer countUpvote) {
+        this.countUpvote = countUpvote;
+    }
+
+    public Integer getCountDownvote() {
+        return countDownvote;
+    }
+
+    public void setCountDownvote(Integer countDownvote) {
+        this.countDownvote = countDownvote;
+    }
+
+    private Integer countDownvote;
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
+    }
 
     public Long getRecommendationId() {
         return recommendationId;
@@ -116,7 +147,7 @@ public class RecommendationResponse {
         this.roles = roles;
     }
 
-    public RecommendationResponse(Long recommendationId, Long userId, String subject, String description, boolean isPrivate, LocalDateTime modifiedAt, recommendation.status myStatus, boolean isArchived, String userName, Long employeeId, String designation, userProfile.roles_enum roles) {
+    public RecommendationResponse(Long recommendationId, Long userId, String subject, String description, boolean isPrivate, LocalDateTime modifiedAt, recommendation.status myStatus, boolean isArchived, String userName, Long employeeId, String designation, userProfile.roles_enum roles, Integer count, Integer countUpvote, Integer countDownvote) {
         this.recommendationId = recommendationId;
         this.userName = userName;
         this.designation = designation;
@@ -129,5 +160,8 @@ public class RecommendationResponse {
         this.isArchived = isArchived;
         this.employeeId = employeeId;
         this.roles = roles;
+        this.count = count;
+        this.countUpvote = countUpvote;
+        this.countDownvote = countDownvote;
     }
 }

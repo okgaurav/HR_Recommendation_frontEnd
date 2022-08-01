@@ -11,6 +11,14 @@ public class votes {
     @EmbeddedId
     private voteKey votekey;
 
+    public boolean isUpvote() {
+        return isUpvote;
+    }
+
+    public void setUpvote(boolean upvote) {
+        isUpvote = upvote;
+    }
+
     @JsonProperty
     @Column(name = "is_upvote")
     private boolean isUpvote;

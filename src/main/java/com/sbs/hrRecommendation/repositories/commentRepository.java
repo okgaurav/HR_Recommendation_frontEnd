@@ -3,6 +3,7 @@ package com.sbs.hrRecommendation.repositories;
 import com.sbs.hrRecommendation.dto.CommentResponse;
 import com.sbs.hrRecommendation.models.comments;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -16,9 +17,10 @@ public interface commentRepository extends JpaRepository<comments, Long> { //We 
             " FROM comments c, users u where c.userId=u.userId and c.recommendationId = ?1")
     List<CommentResponse> findAllComments(Long id);
 
-//    @Query("SELECT c.recommendationId, COUNT(distinct) " +
-//            "FROM comments c " +
-//            "GROUP BY c.recommendationId")
+    @Modifying
+    @Query
+            ("UPDATE recommendations r set r.count = r.count + 1 WHERE r.recommendationId = ?1")
+
     Integer countByRecommendationId(Long id);
 
 }
