@@ -1,5 +1,6 @@
 package com.sbs.hrRecommendation.controllers;
 
+import com.sbs.hrRecommendation.Services.NewUserEmailImp;
 import com.sbs.hrRecommendation.dto.ResetPasswordDTO;
 import com.sbs.hrRecommendation.models.userProfile;
 import com.sbs.hrRecommendation.payload.response.messageResponse;
@@ -11,7 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -24,6 +27,9 @@ public class userProfileController {
 
     @Autowired
     PasswordEncoder encoder;
+
+    @Autowired
+    private NewUserEmailImp newUserEmailImp;
 
 
     @GetMapping
@@ -47,6 +53,7 @@ public class userProfileController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist");
         } else {
             userProfile user = UserProfileRepository.getReferenceById(id);
+
             if (passwordEncoder.matches(resetPasswordDTO.getOldPassword(), user.getPassword())) {
                 user.setPassword(passwordEncoder.encode(resetPasswordDTO.getNewPassword()));
                 UserProfileRepository.saveAndFlush(user);
@@ -60,8 +67,13 @@ public class userProfileController {
     //add a new user API
     @PostMapping(value = "{id}")
     public ResponseEntity<?> adduser(@PathVariable("id") Long id, @RequestBody userProfile user) {
+        String email_sub = "HR Recommendation || Status Update";
         userProfile userdata = UserProfileRepository.getReferenceById(id);
         System.out.println(userdata.getUserId());
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("email",user.getEmailId());
+
         if(Objects.equals(userdata.getRoles(),userProfile.roles_enum.ADMIN))
             {
 //                userProfile newUser = new userProfile(
@@ -72,9 +84,12 @@ public class userProfileController {
 //                        user.getRoles(),
 //                        user.getDepartments());
                 String password= getPassword();
+                map.put("pass", password);
                 user.setPassword(encoder.encode(password));
                 System.out.println(user);
                 UserProfileRepository.saveAndFlush(user);
+
+                newUserEmailImp.newUserMail(user.getEmailId(), email_sub, map);
 
                 // UserProfileRepository.saveAndFlush(newUser);
                  return ResponseEntity.status(200).body(new messageResponse("User Added Successfully"));
