@@ -49,7 +49,7 @@ public class userProfileController {
                 user.setPassword(passwordEncoder.encode(resetPasswordDTO.getNewPassword()));
                 UserProfileRepository.saveAndFlush(user);
             } else {
-              return ResponseEntity.status(400).body(new messageResponse("Invalid Password"));
+              return ResponseEntity.status(400).body(new messageResponse("Incorrect Password"));
             }
         }
         return ResponseEntity.status(200).body(new messageResponse("Password Updated Successfully"));

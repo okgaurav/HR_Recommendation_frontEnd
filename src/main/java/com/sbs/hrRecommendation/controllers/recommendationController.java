@@ -66,19 +66,20 @@ public class recommendationController {
     @RequestMapping(value = "{id}/{category}", method = RequestMethod.GET)
     public List<RecommendationResponse> listRecommendationsCategoryWise(@PathVariable Long id, @PathVariable String category) {
         // If userId is not valid
-        if(!UserProfileRepository.existsById(id))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
+        // if(!UserProfileRepository.existsById(id))
+        //    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Id does not exist");
         userProfile userdata = UserProfileRepository.getReferenceById(id);
         String categoryTab = category.toUpperCase();
 
-        // USER Role not allowed to search in Archived records
-        if (Objects.equals(userdata.getRoles(),userProfile.roles_enum.USER) && Objects.equals(categoryTab,ARCHIVED))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
 
         // Send a particular category of recommendations upon user role access
         switch (categoryTab) {
             case ARCHIVED:
-                return recRepository.findArchived();
+                // USER Role not allowed to search in Archived records
+                if (Objects.equals(userdata.getRoles(),userProfile.roles_enum.USER) && Objects.equals(categoryTab,ARCHIVED))
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+                else
+                    return recRepository.findArchived();
             case DRAFT:
                 return recRepository.findDrafts(id);
             case MYRECOMMENDATIONS:
