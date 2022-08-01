@@ -6,6 +6,7 @@ import org.hibernate.annotations.Type;
 import javax.persistence.*;
 import java.sql.Time;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity(name="recommendations")
 public class recommendation {
@@ -31,6 +32,41 @@ public class recommendation {
     @Column(name="is_archived")
     private boolean isArchived;
 
+    @Column(name = "count")
+    private Integer count = 0;
+
+    @Column(name = "count_upvote")
+    private Integer countUpvote = 0;
+
+    public Integer getCountUpvote() {
+        return countUpvote;
+    }
+
+    public void setCountUpvote(Integer countUpvote) {
+        this.countUpvote = countUpvote;
+    }
+
+    public Integer getCountDownvote() {
+        return countDownvote;
+    }
+
+    public void setCountDownvote(Integer countDownvote) {
+        this.countDownvote = countDownvote;
+    }
+
+    @Column(name = "count_downvote")
+    private Integer countDownvote = 0;
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
+
+
     public boolean getIsArchived() {
         return isArchived;
     }
@@ -47,14 +83,6 @@ public class recommendation {
         this.myStatus = myStatus;
     }
 
-//    public userProfile getUsers() {
-//        return users;
-//    }
-//
-//    public void setUsers(userProfile users) {
-//        this.users = users;
-//    }
-
     public enum status{
 
         DRAFT,
@@ -65,7 +93,6 @@ public class recommendation {
     }
     @ManyToOne
     private userProfile users;
-
 
     public Long getRecommendationId() {
         return recommendationId;
