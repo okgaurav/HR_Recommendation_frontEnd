@@ -29,7 +29,7 @@ public class ArchiveEmailImp {
 
     @Value("${spring.mail.username}") private String sender;
 
-    public String sendArchiveMail(String rec, String sub, Map<String , Object> model, boolean isArchived, String userName, String rec_subject, String hr_name)
+    public String sendArchiveMail(String rec, String sub, Map<String , Object> model, boolean isArchived, String userName, String rec_subject, String hr_name, String feedback)
     {
         // Creating a mime message
         MimeMessage mimeMessage
@@ -52,6 +52,7 @@ public class ArchiveEmailImp {
                 model.put("data",message);
             }
 
+            model.put("feedback", feedback);
             Template t = configuration.getTemplate("final.ftlh");
             FileSystemResource file
                     = new FileSystemResource(

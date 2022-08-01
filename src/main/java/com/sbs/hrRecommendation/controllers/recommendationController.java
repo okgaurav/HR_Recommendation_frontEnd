@@ -2,8 +2,10 @@ package com.sbs.hrRecommendation.controllers;
 import com.sbs.hrRecommendation.Services.ArchiveEmailImp;
 import com.sbs.hrRecommendation.Services.EmailServiceImp;
 import com.sbs.hrRecommendation.dto.RecommendationResponse;
+import com.sbs.hrRecommendation.dto.UpdateRecommendationRequestDTO;
 import com.sbs.hrRecommendation.models.recommendation;
 import com.sbs.hrRecommendation.models.userProfile;
+import com.sbs.hrRecommendation.payload.response.messageResponse;
 import com.sbs.hrRecommendation.repositories.userProfileRepository;
 import com.sbs.hrRecommendation.repositories.recommendationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,12 +143,20 @@ public class recommendationController {
     @PutMapping()
     @RequestMapping(value = "{id}", method = RequestMethod.PUT)
 
-    public recommendation updateRecommendation(@PathVariable Long id, @RequestBody recommendation Recommendation){
+   public ResponseEntity<?> updateRecommendation(@PathVariable Long id, @RequestBody UpdateRecommendationRequestDTO Recommendation){
+
+        // Checks for invalid recommendation id
         if(!recRepository.existsById(id))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recommendation Id does not exist");
+            return ResponseEntity.badRequest().body(new messageResponse("Recommendation Id is not Valid"));
+
         recommendation existingRecommendation = recRepository.getReferenceById(id);
         Long authorId =  existingRecommendation.getUserId();
         Long requestUserId = Recommendation.getUserId();
+
+        // Checks for invalid user id
+        if(!UserProfileRepository.existsById(requestUserId))
+            return ResponseEntity.badRequest().body(new messageResponse("User Id is not Valid"));
+
         userProfile requestUser = UserProfileRepository.getReferenceById(requestUserId);
         userProfile authorUser = UserProfileRepository.getReferenceById(authorId);
         String email = authorUser.getEmailId();
@@ -158,12 +168,14 @@ public class recommendationController {
         String email_sub = "HR Recommendation || Status Update";
         LocalDateTime lt = LocalDateTime.now();
 
+
         Map<String, Object> map = new HashMap<>();
 //        map.put("recomID", requestUserId);
 //        map.put("user_id", authorId);
 //        map.put("user_name", authorUser.getUserName());
-        map.put("hr_name", requestUser.getUserName());
+          map.put("hr_name", requestUser.getUserName());
 //        map.put("recom_sub", recomm_sub);
+          map.put("feedback",Recommendation.getFeedback());
 
 
         /*
@@ -179,7 +191,7 @@ public class recommendationController {
             existingRecommendation.setIsPrivate(Recommendation.getIsPrivate());
             existingRecommendation.setMyStatus(Recommendation.getMyStatus());
             existingRecommendation.setModifiedAt(lt);
-            return recRepository.saveAndFlush(existingRecommendation);
+            return ResponseEntity.ok().body(recRepository.saveAndFlush(existingRecommendation));
         }
 
         /*
@@ -192,7 +204,7 @@ public class recommendationController {
             existingRecommendation.setDescription(Recommendation.getDescription());
             existingRecommendation.setMyStatus(recommendation.status.PENDING);
             existingRecommendation.setModifiedAt(lt);
-            return recRepository.saveAndFlush(existingRecommendation);
+            return ResponseEntity.ok().body(recRepository.saveAndFlush(existingRecommendation));
         }
 
         /*
@@ -214,13 +226,12 @@ public class recommendationController {
 //            System.out.println("old_sta");
 
             emailServiceImp.sendMailWithAttachment(email,email_sub, map, new_sta,
-                                    authorUser.getUserName(), recomm_sub, requestUser.getUserName());
+                                    authorUser.getUserName(), recomm_sub, requestUser.getUserName(), Recommendation.getFeedback());
 
-            return recRepository.saveAndFlush(existingRecommendation);
-
-            /*
+           /*
                 EMAIL TO BE ADDED
             */
+            return ResponseEntity.ok().body(recRepository.saveAndFlush(existingRecommendation));
         }
 
 
@@ -247,16 +258,16 @@ public class recommendationController {
 
             if(!same){
                archiveEmailImp.sendArchiveMail(email,email_sub, map, Recommendation.getIsArchived(),
-                                authorUser.getUserName(), recomm_sub, requestUser.getUserName());
+                                authorUser.getUserName(), recomm_sub, requestUser.getUserName(), Recommendation.getFeedback());
             }
             existingRecommendation.setModifiedAt(lt);
 
-            return recRepository.saveAndFlush(existingRecommendation);
 
+            return ResponseEntity.ok().body(recRepository.saveAndFlush(existingRecommendation));
         }
-
         // User is not authorised to update draft
-       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+//       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
+        return ResponseEntity.badRequest().body(new messageResponse("Operation not valid or not allowed to perform"));
     }
 
     // Search API using UserName and Subject

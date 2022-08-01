@@ -163,7 +163,7 @@
 															<td class="pad"
 																style="width:100%;padding-right:0px;padding-left:0px;padding-top:15px;padding-bottom:15px;">
 																<div align="left" class="alignment"
-																	style="line-height:10px"><img src="https://www.soprabanking.com/wp-content/themes/sopra/assets/svg/logo-v2.svg"
+																	style="line-height:10px"><img src="cid:image001"
 																		style="display: block; height: auto; border: 0; width: 160px; max-width: 100%; padding:10px; margin-left: 15px;"
 																		width="141" /></div>
 															</td>
@@ -182,7 +182,7 @@
 															<td class="pad"
 																style="width:100%;padding-right:0px;padding-left:0px;padding-top:15px;padding-bottom:15px;">
 																<div align="right" class="alignment"
-																	style="line-height:10px"><img src="https://www.soprabanking.com/wp-content/themes/sopra/assets/svg/logo-v2.svg"
+																	style="line-height:10px"><img src="cid:image002"
 																		style="display: block; height: auto; border: 0; width: 160px; max-width: 100%; padding: 10px; margin-right: 25px;"
 																		width="141" /></div>
 															</td>

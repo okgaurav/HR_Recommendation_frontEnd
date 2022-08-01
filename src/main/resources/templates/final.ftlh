@@ -221,11 +221,13 @@
 														<tr>
 															<td class="pad"
 																style="width:100%;text-align:center;padding-top:15px;padding-bottom:15px;">
-																<h1
+																<h4
 																	style="margin: 0; color: #ffffff; font-size: 20px; font-family: Arial, Helvetica Neue, Helvetica, sans-serif; line-height: 120%; text-align: justify; direction: ltr; font-weight: 70; letter-spacing: normal; margin-top: 0; margin-bottom: 0; padding: 0 2rem;">
 																	<span class="tinyMce-placeholder">
 																	${data}
-																	</span></h1>
+
+																	</span></h4><br/>
+																	<p style="color:#ffffff; font-size: 20px; text-align:left;">${feedback}</p>
 															</td>
 														</tr>
 													</table>

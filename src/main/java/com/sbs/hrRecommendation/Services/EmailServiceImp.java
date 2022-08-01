@@ -97,7 +97,7 @@ public class EmailServiceImp {
 //    }
                     // CREATED HTML TEMPLATE FOR EMAIL MESSAGE BODY USING FreeMarkerTemplate......
     public String sendMailWithAttachment(String rec, String sub, Map<String , Object> model, String new_sta, String userName,
-                                                String rec_subject, String hr_name)
+                                                String rec_subject, String hr_name, String feedback)
     {
         System.out.println("inside email");
         // Creating a mime message
@@ -123,10 +123,10 @@ public class EmailServiceImp {
                         + hr_name + " due to following reasons : ";
                 model.put("data",message);
             } else{
-                String message = "Dear " + userName + ",\r\n HR " + hr_name + " has requested some Changes for your Recommendation entitiled " + rec_subject + " with the following feedbacks ";
+                String message = "Dear " + userName + ",\r\n HR " + hr_name + " has requested some Changes for your Recommendation entitiled " + rec_subject + " with the following feedback ";
                 model.put("data",message);
             }
-
+            model.put("feedback",feedback);
             Template t = configuration.getTemplate("final.ftlh");
             FileSystemResource file
                     = new FileSystemResource(
