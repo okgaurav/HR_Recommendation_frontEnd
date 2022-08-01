@@ -1,4 +1,6 @@
 package com.sbs.hrRecommendation.controllers;
+import com.sbs.hrRecommendation.Services.ArchiveEmailImp;
+import com.sbs.hrRecommendation.Services.EmailServiceImp;
 import com.sbs.hrRecommendation.dto.RecommendationResponse;
 import com.sbs.hrRecommendation.models.recommendation;
 import com.sbs.hrRecommendation.models.userProfile;
@@ -21,6 +23,11 @@ public class recommendationController {
     public static final String DRAFT = "DRAFT";
     public static final String ALLRECOMMENDATIONS = "ALLRECOMMENDATIONS";
     public static final String MYRECOMMENDATIONS = "MYRECOMMENDATIONS";
+    @Autowired
+    private EmailServiceImp emailServiceImp;
+
+    @Autowired
+    private ArchiveEmailImp archiveEmailImp;
 
     @Autowired
     private recommendationRepository recRepository;
@@ -132,6 +139,7 @@ public class recommendationController {
 
     @PutMapping()
     @RequestMapping(value = "{id}", method = RequestMethod.PUT)
+
     public recommendation updateRecommendation(@PathVariable Long id, @RequestBody recommendation Recommendation){
         if(!recRepository.existsById(id))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recommendation Id does not exist");
@@ -139,9 +147,23 @@ public class recommendationController {
         Long authorId =  existingRecommendation.getUserId();
         Long requestUserId = Recommendation.getUserId();
         userProfile requestUser = UserProfileRepository.getReferenceById(requestUserId);
+        userProfile authorUser = UserProfileRepository.getReferenceById(authorId);
+        String email = authorUser.getEmailId();
+        String recomm_sub = existingRecommendation.getSubject();
+        String hrEmail = requestUser.getEmailId();
         userProfile.roles_enum requestUserRole = requestUser.getRoles();
         recommendation.status existingRecommendationStatus = existingRecommendation.getMyStatus();
+
+        String email_sub = "HR Recommendation || Status Update";
         LocalDateTime lt = LocalDateTime.now();
+
+        Map<String, Object> map = new HashMap<>();
+//        map.put("recomID", requestUserId);
+//        map.put("user_id", authorId);
+//        map.put("user_name", authorUser.getUserName());
+        map.put("hr_name", requestUser.getUserName());
+//        map.put("recom_sub", recomm_sub);
+
 
         /*
             DRAFT:
@@ -184,10 +206,22 @@ public class recommendationController {
                 && !Objects.equals(existingRecommendationStatus, recommendation.status.DRAFT)
                 && !Objects.equals(Recommendation.getMyStatus(),null)
                 && !Objects.equals(Recommendation.getMyStatus(),recommendation.status.DRAFT)) {
+
             existingRecommendation.setMyStatus(Recommendation.getMyStatus());
             existingRecommendation.setModifiedAt(lt);
+            String new_sta = Recommendation.getMyStatus().toString();
+//            System.out.println("old_sta");
+
+            emailServiceImp.sendMailWithAttachment(email,email_sub, map, new_sta,
+                                    authorUser.getUserName(), recomm_sub, requestUser.getUserName());
+
             return recRepository.saveAndFlush(existingRecommendation);
+
+            /*
+                EMAIL TO BE ADDED
+            */
         }
+
 
        /*
             ARCHIVED:
@@ -202,10 +236,22 @@ public class recommendationController {
                 && (Objects.equals(existingRecommendationStatus, recommendation.status.APPROVED)
                 ||  Objects.equals(existingRecommendationStatus, recommendation.status.DECLINED)
                 || Objects.equals(existingRecommendationStatus, recommendation.status.PENDING))) {
+            boolean isArchived_body = Recommendation.getIsArchived();
+            boolean isArchived_db = existingRecommendation.getIsArchived();
             existingRecommendation.setMyStatus(existingRecommendationStatus);
             existingRecommendation.setIsArchived(Recommendation.getIsArchived());
+
+            boolean same = Objects.equals(isArchived_db, isArchived_body);
+            System.out.println(same);
+
+            if(!same){
+               archiveEmailImp.sendArchiveMail(email,email_sub, map, Recommendation.getIsArchived(),
+                                authorUser.getUserName(), recomm_sub, requestUser.getUserName());
+            }
             existingRecommendation.setModifiedAt(lt);
+
             return recRepository.saveAndFlush(existingRecommendation);
+
         }
 
         // User is not authorised to update draft
@@ -229,7 +275,8 @@ public class recommendationController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
 
         // Validations: default values to Query body
-        if(Objects.equals(searchParams.getSubject(), null))searchParams.setSubject("");
+        if(Objects.equals(searchParams.getSubject(), null))
+            searchParams.setSubject("");
         if(Objects.equals(searchParams.getUserName(), null))searchParams.setUserName("");
 
         // Search according to the category type
@@ -249,4 +296,10 @@ public class recommendationController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Operation not valid");
         }
     }
+
+//    @PostMapping
+//    @RequestMapping("/sendMail")
+//    private String sendMail(@RequestBody EmailDetails emailDetails){
+//        return emailService.sendMail(emailDetails);
+//    }
 }

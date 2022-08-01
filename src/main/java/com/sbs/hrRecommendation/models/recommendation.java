@@ -32,6 +32,8 @@ public class recommendation {
     @Column(name="is_archived")
     private boolean isArchived;
 
+
+
     public boolean getIsArchived() {
         return isArchived;
     }
